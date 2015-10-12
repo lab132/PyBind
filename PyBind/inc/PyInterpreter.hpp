@@ -52,21 +52,35 @@ namespace pyb
 	inline
 	Object pyb::Interpreter::RunString( const std::string & expression, const Object * globals, const Object * locals )
 	{
-		Py_INCREF( Py_None );
+		PyObject* mainModule = nullptr;
+		PyObject* globalsDict = nullptr;
+		Object ownedGlobals;
 
-		auto* mainModule = PyImport_AddModule( "__main__" );
+		if( globals == nullptr || locals == nullptr )
+		{
+			mainModule = PyImport_AddModule( "__main__" );
 
-		assert( mainModule );
+			assert( mainModule );
 
-		auto* globalsDict = PyModule_GetDict(mainModule);
+			globalsDict = PyModule_GetDict( mainModule );
+			ownedGlobals = Object::own( globalsDict );
+		}
+
+		if( globals == nullptr )
+		{
+			globals = &ownedGlobals;
+		}
+		if( locals == nullptr )
+		{
+			locals = &ownedGlobals;
+		}
 
 		assert( globalsDict );
 		PyObject* obj = PyRun_String(
 			expression.c_str(),
 			Py_file_input,
-			( globals != nullptr ? globals->ObjectPtr() : globalsDict),
-			(locals != nullptr ? locals->ObjectPtr() : globalsDict ) );
-		Py_DECREF( Py_None );
+			globals->ObjectPtr(),
+			locals->ObjectPtr());
 		if( obj == nullptr )
 		{
 			PyErr_Print();
