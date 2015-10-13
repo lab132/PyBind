@@ -211,5 +211,9 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 
+# Ignore output folders
+/bin/
+/lib/
+
 # Ignore top-level workspace folder
 /workspace/

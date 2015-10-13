@@ -3,12 +3,35 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 project(PyBind)
 
+# General Setup
+# =============
+# Use at least C++11
+set(CMAKE_CXX_STANDARD 11)
+
+# Make file(INSTALL) less noisy
+set(CMAKE_INSTALL_MESSAGE "LAZY")
+
+set(CMAKE_DEBUG_POSTFIX          "-debug"   CACHE STRING "e.g. PyBind-debug.dll")
+set(CMAKE_MINSIZEREL_POSTFIX     "-minsize" CACHE STRING "e.g. PyBind-minsize.dll")
+set(CMAKE_RELWITHDEBINFO_POSTFIX "-reldeb"  CACHE STRING "e.g. PyBind-reldeb.dll")
+set(CMAKE_RELEASE_POSTFIX        ""         CACHE STRING "e.g. PyBind.dll (no postfix)")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
+foreach(CONFIG ${CMAKE_CONFIGURATION_TYPES})
+  string(TOUPPER ${CONFIG} CONFIG)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${CMAKE_SOURCE_DIR}/bin")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${CMAKE_SOURCE_DIR}/lib")
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} "${CMAKE_SOURCE_DIR}/lib")
+endforeach()
+
 # Python 3.5
 # ==========
 find_path(PYTHON_3_DIR "python3.dll")
 
 find_library(PYTHON_35_LIB "python35" PATHS "${PYTHON_3_DIR}/libs")
-if(NOT PYTHON_35_LIB)
+if(NOT EXISTS "${PYTHON_35_LIB}")
   message(FATAL_ERROR "Unable to find python 3.5. Make sure it's in your path.")
 endif()
 
