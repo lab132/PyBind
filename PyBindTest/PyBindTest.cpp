@@ -6,16 +6,16 @@
 #include <PyBind.hpp>
 
 
-int _tmain(int argc, wchar_t* argv[])
+int _tmain( int argc, wchar_t* argv [] )
 {
-	pyb::Interpreter interpreter;
+  pyb::Interpreter interpreter;
 
-	interpreter.Initialize(argv[0]);
+  interpreter.Initialize( argv[ 0 ] );
 
-	interpreter.RunString( "print(\"Hello\")" );
+  interpreter.RunString( "print(\"Hello\")" );
 
-	interpreter.Finalize();
+  interpreter.Finalize();
 
-    return 0;
+  return 0;
 }
 
