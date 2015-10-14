@@ -18,9 +18,27 @@ namespace pyb
 
 		PyObject* m_PyObject;
 
+		/**
+		@brief Checks whether the wrapped PythonObject is a valid pointer or not
+		*/
 		bool IsValid() const;
 
-		static Object Own( PyObject* pyObject );
+		/**
+		@brief Creates new Object and owns it (incrementing the refCount)
+		This should be used if a python API function returns a borrowed reference
+		
+		@param pyObject the reference to be owned
+		@return The created wrapper, owning the python object
+		*/
+		static Object FromBorrowed( PyObject* pyObject );
+
+		/**
+		@brief Creates new Object wrapper for a newly created python object
+		This should be used if a python API function returns a new reference
+
+		@param pyObject the reference to be new python Object
+		@return The created wrapper, for the python object
+		*/
 		static Object FromNewRef( PyObject* pyObject );
 	};
 
@@ -62,7 +80,7 @@ namespace pyb
 	}
 
 	inline
-	Object Object::Own( PyObject * pyObject )
+	Object Object::FromBorrowed( PyObject * pyObject )
 	{
 		Object obj;
 		obj.m_PyObject = pyObject;

@@ -17,12 +17,39 @@ namespace pyb
 		*/
 		void Initialize( wchar_t* programName );
 
+		/**
+		@brief Destroys the interpreter, freeing all resources.
+		After this point the interpreter and all python related stuff should not be used anymore.
+		
+		*/
 		void Finalize();
 
+		/**
+		@brief Runs a python interpreter with the given arguments.
+		The args behave the same as passed into python.exe directly.
+
+		If called with no arguments this method will block execution and display an user interactive command line
+		in the console.
+		
+		@param argc number of arguments
+		@param argv the arguments, encoded in utf-16
+		*/
 		void RunPyMain( int argc, wchar_t* argv [] );
 
+		/**
+		
+		@param globals pass a custom globals dict, if nullptr is used it will be replaced with the __main__ module dict
+		@param locals pass a custom locals dict, if nullptr is used it will be replaced with the __main__ module dict
+		@return the result of the python expression
+		*/
 		Object RunString( const std::string& expression, const Object* globals = nullptr, const Object* locals = nullptr );
 
+		/**
+
+		@param globals pass a custom globals dict, if nullptr is used it will be replaced with the __main__ module dict
+		@param locals pass a custom locals dict, if nullptr is used it will be replaced with the __main__ module dict
+		@return the result of the python file
+		*/
 		Object RunFile( const std::string& fileName, const Object* globals = nullptr, const Object* locals = nullptr );
 
 		/**
@@ -115,7 +142,7 @@ namespace pyb
 			assert( mainModule );
 
 			auto* globalsDict = PyModule_GetDict( mainModule );
-			m_GlobalsDict = Object::Own( globalsDict );
+			m_GlobalsDict = Object::FromBorrowed( globalsDict );
 		}
 
 		return &m_GlobalsDict;
