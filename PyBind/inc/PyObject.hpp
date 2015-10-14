@@ -7,7 +7,6 @@ namespace pyb
 	class Object
 	{
 	public:
-		Object( PyObject* obj );
 		Object( const Object& obj );
 		Object( Object&& other );
 		Object();
@@ -19,15 +18,11 @@ namespace pyb
 
 		PyObject* m_PyObject;
 
-		static Object own( PyObject* pyObject );
-	};
+		bool IsValid() const;
 
-	inline
-	Object::Object( PyObject * obj ) :
-		m_PyObject(obj)
-	{
-		assert( m_PyObject );
-	}
+		static Object Own( PyObject* pyObject );
+		static Object FromNewRef( PyObject* pyObject );
+	};
 
 	inline
 	Object::Object( const Object & obj ) :
@@ -61,12 +56,25 @@ namespace pyb
 		return m_PyObject;
 	}
 
-	inline
-	Object Object::own( PyObject * pyObject )
+	inline bool Object::IsValid() const
 	{
-		assert( pyObject );
-		Object obj = Object( pyObject );
-		Py_INCREF( pyObject );
+		return m_PyObject != nullptr;
+	}
+
+	inline
+	Object Object::Own( PyObject * pyObject )
+	{
+		Object obj;
+		obj.m_PyObject = pyObject;
+		Py_XINCREF( pyObject );
+		return obj;
+	}
+
+	inline
+	Object Object::FromNewRef( PyObject* pyObject )
+	{
+		Object obj;
+		obj.m_PyObject = pyObject;
 		return obj;
 	}
 
