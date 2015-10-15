@@ -16,6 +16,8 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.Finalize();
 
+  pyb::Module module( "test", "some test module" );
+
   return 0;
 }
 
