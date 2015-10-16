@@ -2,10 +2,14 @@
 
 #include "PyBindCommon.hpp"
 #include "PyObject.hpp"
+#include "PyModule.hpp"
 #include <stdio.h>
+#include <vector>
+#include <xutility>
 
 namespace pyb
 {
+  class Module;
   class Interpreter
   {
   public:
@@ -60,8 +64,12 @@ namespace pyb
     */
     const Object* GetMainDict();
 
+    void RegisterModule( Module* module );
+
   private:
     Object m_GlobalsDict;
+
+    std::vector< Module* > m_Modules;
   };
 
   inline
@@ -133,7 +141,7 @@ namespace pyb
   }
 
   inline
-    const Object* Interpreter::GetMainDict()
+  const Object* Interpreter::GetMainDict()
   {
     if( !m_GlobalsDict.IsValid() )
     {
@@ -146,5 +154,17 @@ namespace pyb
     }
 
     return &m_GlobalsDict;
+  }
+
+  inline
+  void Interpreter::RegisterModule( Module * module )
+  {
+    if( std::find( m_Modules.begin(), m_Modules.end(), module ) == m_Modules.end() )
+    {
+
+      module->RegisterAtInterpreter( *this );
+
+      m_Modules.push_back( module );
+    }
   }
 }

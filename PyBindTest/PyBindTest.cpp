@@ -14,10 +14,14 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.RunString( "print(\"Hello\")" );
 
+
+  pyb::Module module( "myTest", "some test module" );
+
+  interpreter.RegisterModule( &module );
+
+  interpreter.RunPyMain( argc, argv );
+
   interpreter.Finalize();
-
-  pyb::Module module( "test", "some test module" );
-
   return 0;
 }
 
