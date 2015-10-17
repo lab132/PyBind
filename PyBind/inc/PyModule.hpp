@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PyBindCommon.hpp"
+#include <vector>
 
 namespace pyb
 {
@@ -22,7 +23,9 @@ namespace pyb
   private:
 
     void RegisterAtInterpreter( const Interpreter& interpreter );
+    void AppendFunction( const PyMethodDef& def );
 
+    void WriteMethodSentinel();
 
     std::string m_Name;
     std::string m_Documentation;
@@ -32,6 +35,8 @@ namespace pyb
     bool m_Registered;
 
     PyModuleDef m_ModuleDef;
+
+    std::vector<PyMethodDef> m_MethodDefinitions;
   };
 
   inline pyb::Module::Module( const std::string& name, const std::string& documentation ) :
@@ -39,6 +44,7 @@ namespace pyb
     m_Documentation(documentation),
     m_Registered(false)
   {
+    m_MethodDefinitions.push_back( {nullptr,nullptr,0,nullptr} );
   }
 
   inline const void pyb::Module::SetName( const std::string & name )
@@ -84,16 +90,24 @@ namespace pyb
 
   }
 
+  inline void Module::AppendFunction( const PyMethodDef & def )
+  {
+    memcpy( m_MethodDefinitions.data() + m_MethodDefinitions.size() - 1, &def, sizeof( PyMethodDef ) );
+    WriteMethodSentinel();
+  }
+
+  inline void Module::WriteMethodSentinel()
+  {
+    m_MethodDefinitions.push_back( { nullptr,nullptr,0,nullptr } );
+  }
+
   inline
   void pyb::Module::AddFunction( PyCFunction function, const char * name )
   {
-    PyMethodDef methodDef [] =
-    {
-      {name, function, 0, name},
-      {nullptr, nullptr, 0, nullptr}
-    };
 
-    int result = PyModule_AddFunctions( m_Module.ObjectPtr(), methodDef );
+    AppendFunction( { name, function, METH_VARARGS| METH_KEYWORDS, name } );
+    // Redefine all function, because the vector might have resized and definitions have moved in memory
+    int result = PyModule_AddFunctions( m_Module.ObjectPtr(), m_MethodDefinitions.data() );
 
     assert( result == 0 );
 

@@ -13,9 +13,9 @@ struct Test
   }
 };
 
-void test()
+void test(int a, int b, const char* string)
 {
-  printf( "YAY!!! FUNCTION!!!\n" );
+  printf( "Got %d, %d and %s\n", a,b,string );
 }
 
 int _tmain( int argc, wchar_t* argv [] )
@@ -31,13 +31,13 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.RegisterModule( &module );
 
-  module.AddFunction( pyb::BindFunctionHelper<>::Bind<&test>( "test" ), "test" );
+  module.AddFunction( pyb::BindFunctionHelper<void,int,int,const char*>::Bind<&test>( "t" ), "t" );
 
   interpreter.RunPyMain( argc, argv );
 
-  Test t;
+  //Test t;
 
-  pyb::BindMethodHelper<Test>::Bind<&Test::test>("test");
+  //pyb::BindMethodHelper<Test>::Bind<&Test::test>("test");
 
 
   interpreter.Finalize();
