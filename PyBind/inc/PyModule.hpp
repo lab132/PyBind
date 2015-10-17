@@ -16,11 +16,13 @@ namespace pyb
     const void SetName(const std::string& name);
 
     bool IsRegistered() const;
+    void AddFunction( PyCFunction function, const char* name );
 
     friend class Interpreter;
   private:
 
     void RegisterAtInterpreter( const Interpreter& interpreter );
+
 
     std::string m_Name;
     std::string m_Documentation;
@@ -78,6 +80,22 @@ namespace pyb
 
     PyDict_SetItemString( moduleDict.ObjectPtr(), m_Name.c_str(), m_Module.ObjectPtr() );
 
+
+
+  }
+
+  inline
+  void pyb::Module::AddFunction( PyCFunction function, const char * name )
+  {
+    PyMethodDef methodDef [] =
+    {
+      {name, function, 0, name},
+      {nullptr, nullptr, 0, nullptr}
+    };
+
+    int result = PyModule_AddFunctions( m_Module.ObjectPtr(), methodDef );
+
+    assert( result == 0 );
 
 
   }

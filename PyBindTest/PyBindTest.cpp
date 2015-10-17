@@ -5,6 +5,18 @@
 
 #include <PyBind.hpp>
 
+struct Test
+{
+  void test()
+  {
+    printf( "YAY!!!" );
+  }
+};
+
+void test()
+{
+  printf( "YAY!!! FUNCTION!!!\n" );
+}
 
 int _tmain( int argc, wchar_t* argv [] )
 {
@@ -19,7 +31,14 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.RegisterModule( &module );
 
+  module.AddFunction( pyb::BindFunctionHelper<>::Bind<&test>( "test" ), "test" );
+
   interpreter.RunPyMain( argc, argv );
+
+  Test t;
+
+  pyb::BindMethodHelper<Test>::Bind<&Test::test>("test");
+
 
   interpreter.Finalize();
   return 0;

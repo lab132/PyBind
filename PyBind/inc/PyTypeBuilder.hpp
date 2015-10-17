@@ -14,25 +14,30 @@ namespace pyb
   template<typename T>
   struct PyTypeTrait
   {
-    static_assert(false, "Could not deduce type");
   };
 
-  template<int>
-  struct PyTypeTrait
+  template<>
+  struct PyTypeTrait<int>
   {
-    const char* PyTypeString = "i";
+    static constexpr const char* PyTypeString = "i";
   };
 
-  template<const char*>
-  struct PyTypeTrait
+  template<>
+  struct PyTypeTrait<const char*>
   {
-    const char* PyTypeString = "s";
+    static constexpr const char* PyTypeString = "s";
   };
 
-  template<std::string>
-  struct PyTypeTrait
+  template<>
+  struct PyTypeTrait<void>
   {
-    const char* PyTypeString = "s";
+    static constexpr const char* PyTypeString = "";
+  };
+
+  template<>
+  struct PyTypeTrait<std::string>
+  {
+    static constexpr const char* PyTypeString = "s";
   };
 
   template<typename T, typename RT, typename ...ArgT>
@@ -40,13 +45,65 @@ namespace pyb
   {
     BaseBindObject<T> m_Object;
 
-    RT(T::* m_Method)(...ArgT);
+    RT(T::* m_Method)(ArgT...);
   };
 
-  template<typename T, typename RT, typename ...ArgT>
-  BindDelegate<T, RT, ArgT...> BuildDelegate(T* pointer, RT(T::* method)(ArgT...)
+  template<typename T = void>
+  std::string BuildFunctionAgumentString()
   {
-    BindDelegate<T, RT, ArgT...> delegate;
-    delegate.m_Object.ptr = pointer;
+    return std::string( PyTypeTrait<T>::PyTypeString );
   }
+
+  template<typename T, typename ...ArgT>
+  std::string BuildFunctionAgumentString()
+  {
+    return std::string( PyTypeTrait<T>::PyTypeString ) + BuildFunctionAgumentString<ArgT...>();
+  }
+
+  template<typename T, typename RT = void, typename ...ArgT>
+  struct BindMethodHelper
+  {
+    template< RT(T::*F)(ArgT... ) >
+    static
+    inline
+    PyCFunction Bind( const char* name )
+    {
+
+
+      auto func = []( PyObject* self, PyObject* args )
+      {
+        BaseBindObject<T>* boundObject = reinterpret_cast< BaseBindObject<T>* >( self );
+
+        ( boundObject->ptr->*F )( );
+        Py_INCREF( Py_None );
+        return Py_None;
+      };
+
+      return func;
+    }
+
+
+  };
+
+  template<typename RT = void, typename ...ArgT>
+  struct BindFunctionHelper
+  {
+    template< RT( *F )( ArgT... ) >
+    static
+      inline
+      PyCFunction Bind( const char* name )
+    {
+
+
+      auto func = []( PyObject* self, PyObject* args )
+      {
+
+        ( *F )( );
+        Py_INCREF( Py_None );
+        return Py_None;
+      };
+      return func;
+    }
+  };
+
 }
