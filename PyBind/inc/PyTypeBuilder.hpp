@@ -160,7 +160,7 @@ namespace pyb
     template< RT( *F )( ArgT... ) >
     static
       inline
-      PyCFunction Bind( const char* name )
+      PyCFunction Bind()
     {
 
 
@@ -175,8 +175,18 @@ namespace pyb
         Py_INCREF( Py_None );
         return Py_None;
       };
-      return reinterpret_cast<PyCFunction>(func);
+      return reinterpret_cast< PyCFunction >( func );
     }
   };
+
+
+  template<typename RT = void, typename ...ArgT>
+  constexpr
+  BindFunctionHelper<RT, ArgT...> Bind( RT( *F )( ArgT... ) )
+  {
+    return BindFunctionHelper<RT, ArgT...>();
+  }
+
+
 
 }

@@ -5,3 +5,4 @@
 #include "PyInterpreter.hpp"
 #include "PyModule.hpp"
 #include "PyTypeBuilder.hpp"
+#include "PyTypeMacros.hpp"

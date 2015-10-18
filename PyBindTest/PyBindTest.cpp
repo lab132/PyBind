@@ -31,13 +31,14 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.RegisterModule( &module );
 
-  module.AddFunction( pyb::BindFunctionHelper<void,int,int,const char*>::Bind<&test>( "t" ), "t" );
+  module.AddFunction( PY_BIND_FUNCTION( test ), "t" );
 
   interpreter.RunPyMain( argc, argv );
 
   //Test t;
 
   //pyb::BindMethodHelper<Test>::Bind<&Test::test>("test");
+
 
 
   interpreter.Finalize();
