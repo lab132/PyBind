@@ -40,6 +40,7 @@ int _tmain( int argc, wchar_t* argv [] )
 
   module.AddFunction( PY_BIND_FUNCTION( test ), "t" );
   module.AddFunction( PY_BIND_FUNCTION( test2 ), "t2" );
+  module.AddFunction( PY_BIND_FUNCTION( Test::test ), "t3" );
 
   interpreter.RunPyMain( argc, argv );
 
