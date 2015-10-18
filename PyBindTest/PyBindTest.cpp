@@ -13,6 +13,13 @@ struct Test
   }
 };
 
+
+void test2( int a, const char* b, const char* string )
+{
+  printf( "Got 2 %d, %s and %s\n", a, b, string );
+
+}
+
 void test(int a, int b, const char* string)
 {
   printf( "Got %d, %d and %s\n", a,b,string );
@@ -32,6 +39,7 @@ int _tmain( int argc, wchar_t* argv [] )
   interpreter.RegisterModule( &module );
 
   module.AddFunction( PY_BIND_FUNCTION( test ), "t" );
+  module.AddFunction( PY_BIND_FUNCTION( test2 ), "t2" );
 
   interpreter.RunPyMain( argc, argv );
 

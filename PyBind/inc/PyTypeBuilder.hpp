@@ -41,14 +41,6 @@ namespace pyb
     static constexpr const char* PyTypeString = "s";
   };
 
-  template<typename T, typename RT, typename ...ArgT>
-  struct BindDelegate
-  {
-    BaseBindObject<T> m_Object;
-
-    RT(T::* m_Method)(ArgT...);
-  };
-
   template<typename ... ArgT>
   struct ArgumentStringHelper;
 
@@ -79,7 +71,7 @@ namespace pyb
   };
 
   template<typename ...ArgT>
-  std::string BuildFunctionAgumentString()
+  std::string BuildFunctionArgumentString()
   {
     return ArgumentStringHelper<ArgT...>::BuildString();
 
@@ -166,7 +158,7 @@ namespace pyb
 
       PyCFunctionWithKeywords func = []( PyObject* self, PyObject* args, PyObject* keywords )
       {
-        const std::string argumentString = BuildFunctionAgumentString<ArgT...>();
+        static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
         std::tuple<ArgT...> arguments;
         CallHelper<RT, ArgT...>::CallTypeHelper<F>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() );
