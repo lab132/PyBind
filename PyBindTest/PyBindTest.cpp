@@ -7,7 +7,7 @@
 
 struct Test
 {
-  void test()
+  void test() const
   {
     printf( "YAY!!!" );
   }

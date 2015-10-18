@@ -211,14 +211,48 @@ namespace pyb
     };
   };
 
+  // Call helper for const methods
+  template<typename T, typename RT, typename ...ArgT>
+  struct CallHelper<RT( T::* )( ArgT... ) const>
+  {
+    template< RT( T::*F )( ArgT... ) const>
+    struct CallTypeHelper
+    {
+      template<size_t ...S>
+      static
+        inline
+        void Call( T* obj, const std::tuple<ArgT...>& arguments, seq<S...> )
+      {
+        ( obj->*F )( std::get<S>( arguments )... );
+      }
+
+      template<size_t ...S>
+      static
+        inline
+        bool ParseArguments( const std::string& argumentString, PyObject* object, std::tuple<ArgT...>& arguments, seq<S...> )
+      {
+        int result = PyArg_ParseTuple( object, argumentString.c_str(), &std::get<S>( arguments )... );
+
+        if( result == 0 )
+        {
+          printf( "Could not parse arguments, expected: (%s)\n", BuildVerboseFunctionArgumentString<ArgT...>().c_str() );
+          PyErr_Clear();
+          return false;
+        }
+        return true;
+      }
+    };
+  };
+
   template <typename ...>
-  struct BindFunctionHelper
+  struct BindHelper
   {
 
   };
 
+  // Bind helper for functions
   template<typename RT, typename ...ArgT>
-  struct BindFunctionHelper<RT( ArgT... )>
+  struct BindHelper<RT( ArgT... )>
   {
     template< RT( *F )( ArgT... ) >
     static
@@ -244,17 +278,9 @@ namespace pyb
     }
   };
 
-
-  template<typename RT, typename ...ArgT>
-  constexpr
-  BindFunctionHelper<RT(ArgT...)> Bind( RT( *F )( ArgT... ) )
-  {
-    return BindFunctionHelper<RT( ArgT...)>();
-  }
-
-
+  // Bind helper for methods
   template<typename T, typename RT, typename ...ArgT>
-  struct BindFunctionHelper<RT( T::* )( ArgT...)>
+  struct BindHelper<RT( T::* )( ArgT...)>
   {
     template< RT( T::*F )( ArgT... ) >
     static
@@ -284,11 +310,57 @@ namespace pyb
 
   };
 
+  // Bind helper for const methods
+  template<typename T, typename RT, typename ...ArgT>
+  struct BindHelper<RT( T::* )( ArgT... ) const>
+  {
+    template< RT( T::*F )( ArgT... ) const>
+    static
+      inline
+      PyCFunction Bind()
+    {
+
+
+      PyCFunctionWithKeywords func = []( PyObject* self, PyObject* args, PyObject* keywords )
+      {
+        static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
+
+        BaseBindObject<T>* typedSelf = reinterpret_cast< BaseBindObject<T>* >( self );
+
+        std::tuple<ArgT...> arguments;
+        if( CallHelper<RT( T::* )( ArgT... ) const>::CallTypeHelper<F>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
+        {
+          CallHelper<RT( T::* )( ArgT... ) const>::CallTypeHelper<F>::Call( typedSelf->ptr, arguments, gens<sizeof...( ArgT )>::type() );
+        }
+
+        Py_INCREF( Py_None );
+        return Py_None;
+      };
+      return reinterpret_cast< PyCFunction >( func );
+    }
+
+
+  };
+
+  template<typename RT, typename ...ArgT>
+  constexpr
+    BindHelper<RT( ArgT... )> Bind( RT( *F )( ArgT... ) )
+  {
+    return BindHelper<RT( ArgT... )>();
+  }
+
   template<typename T, typename RT, typename ...ArgT>
   constexpr
-    BindFunctionHelper<RT(T::*)(ArgT...)> Bind( RT( T::*F )( ArgT... ) )
+    BindHelper<RT( T::* )( ArgT... )> Bind( RT( T::*F )( ArgT... ) )
   {
-    return BindFunctionHelper<RT(T::*)(ArgT...)>();
+    return BindHelper<RT( T::* )( ArgT... )>();
+  }
+
+  template<typename T, typename RT, typename ...ArgT>
+  constexpr
+    BindHelper<RT( T::* )( ArgT... ) const> Bind( RT( T::*F )( ArgT... ) const )
+  {
+    return BindHelper<RT( T::* )( ArgT... ) const>();
   }
 
 
