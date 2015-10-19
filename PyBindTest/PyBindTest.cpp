@@ -14,10 +14,10 @@ struct Test
 };
 
 
-void test2( int a, const char* b, const char* string )
+int test2( int a, int b)
 {
-  printf( "Got 2 %d, %s and %s\n", a, b, string );
-
+  printf( "Got 2 %d, %d\n", a, b);
+  return a + b;
 }
 
 void test(int a, int b, const char* string)

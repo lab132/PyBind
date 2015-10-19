@@ -161,9 +161,9 @@ namespace pyb
       template<size_t ...S>
       static
       inline
-      void Call( const std::tuple<ArgT...>& arguments, seq<S...> )
+      RT Call( const std::tuple<ArgT...>& arguments, seq<S...> )
       {
-        ( *F )( std::get<S>( arguments )... );
+        return ( *F )( std::get<S>( arguments )... );
       }
 
       template<size_t ...S>
@@ -195,9 +195,9 @@ namespace pyb
       template<size_t ...S>
       static
         inline
-        void Call( T* obj, const std::tuple<ArgT...>& arguments, seq<S...> )
+        RT Call( T* obj, const std::tuple<ArgT...>& arguments, seq<S...> )
       {
-        ( obj->*F )( std::get<S>( arguments )... );
+        return ( obj->*F )( std::get<S>( arguments )... );
       }
 
       template<size_t ...S>
@@ -228,9 +228,9 @@ namespace pyb
       template<size_t ...S>
       static
         inline
-        void Call( T* obj, const std::tuple<ArgT...>& arguments, seq<S...> )
+        RT Call( T* obj, const std::tuple<ArgT...>& arguments, seq<S...> )
       {
-        ( obj->*F )( std::get<S>( arguments )... );
+        return ( obj->*F )( std::get<S>( arguments )... );
       }
 
       template<size_t ...S>
@@ -273,12 +273,45 @@ namespace pyb
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
         std::tuple<ArgT...> arguments;
+
+        RT result = RT();
+
         if( CallHelper<RT, ArgT...>::CallTypeHelper<F>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
         {
-          CallHelper<RT, ArgT...>::CallTypeHelper<F>::Call( arguments, gens<sizeof...( ArgT )>::type() );
+          result = CallHelper<RT, ArgT...>::CallTypeHelper<F>::Call( arguments, gens<sizeof...( ArgT )>::type() );
         }
 
-        Py_INCREF( Py_None );
+        PyObject* obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
+        return obj;
+      };
+      return BindDelegate{false, reinterpret_cast<PyCFunction>(func), name};
+    }
+  };
+
+  // Bind helper for functions
+  template<typename ...ArgT>
+  struct BindHelper<void (ArgT...)>
+  {
+    template< void(*F)(ArgT...) >
+    static
+      inline
+      BindDelegate Bind(const char* name)
+    {
+
+
+      PyCFunctionWithKeywords func = [](PyObject* self, PyObject* args, PyObject* keywords)
+      {
+        static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
+
+        std::tuple<ArgT...> arguments;
+
+
+        if(CallHelper<void, ArgT...>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        {
+           CallHelper<void, ArgT...>::CallTypeHelper<F>::Call(arguments, gens<sizeof...(ArgT)>::type());
+        }
+
+        Py_INCREF(Py_None);
         return Py_None;
       };
       return BindDelegate{false, reinterpret_cast<PyCFunction>(func), name};
@@ -302,14 +335,15 @@ namespace pyb
 
         BaseBindObject<T>* typedSelf = reinterpret_cast< BaseBindObject<T>* >( self );
 
+        RT result;
         std::tuple<ArgT...> arguments;
         if( CallHelper<RT( T::* )( ArgT... )>::CallTypeHelper<F>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
         {
-          CallHelper<RT( T::* )( ArgT... )>::CallTypeHelper<F>::Call( typedSelf->ptr, arguments, gens<sizeof...( ArgT )>::type() );
+          result = CallHelper<RT( T::* )( ArgT... )>::CallTypeHelper<F>::Call( typedSelf->ptr, arguments, gens<sizeof...( ArgT )>::type() );
         }
 
-        Py_INCREF( Py_None );
-        return Py_None;
+        PyObject obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
+        return obj;
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
@@ -333,15 +367,47 @@ namespace pyb
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
         BaseBindObject<T>* typedSelf = reinterpret_cast< BaseBindObject<T>* >( self );
-
+        RT result;
         std::tuple<ArgT...> arguments;
         if( CallHelper<RT( T::* )( ArgT... ) const>::CallTypeHelper<F>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
         {
-          CallHelper<RT( T::* )( ArgT... ) const>::CallTypeHelper<F>::Call( typedSelf->ptr, arguments, gens<sizeof...( ArgT )>::type() );
+          result = CallHelper<RT( T::* )( ArgT... ) const>::CallTypeHelper<F>::Call( typedSelf->ptr, arguments, gens<sizeof...( ArgT )>::type() );
         }
 
-        Py_INCREF( Py_None );
+        PyObject* obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
+        return obj;
+      };
+      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+    }
+
+
+  };
+
+  // Bind helper for const methods
+  template<typename T, typename ...ArgT>
+  struct BindHelper<void(T::*)(ArgT...) const>
+  {
+    template< void(T::*F)(ArgT...) const>
+    static
+      inline
+      BindDelegate Bind(const char* name)
+    {
+
+
+      PyCFunctionWithKeywords func = [](PyObject* self, PyObject* args, PyObject* keywords)
+      {
+        static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
+
+        BaseBindObject<T>* typedSelf = reinterpret_cast<BaseBindObject<T>*>(self);
+        std::tuple<ArgT...> arguments;
+        if(CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        {
+          CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::Call(typedSelf->ptr, arguments, gens<sizeof...(ArgT)>::type());
+        }
+
+        Py_INCREF(Py_None);
         return Py_None;
+
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
