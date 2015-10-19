@@ -432,6 +432,38 @@ namespace pyb
 
   };
 
+  // Bind helper for const methods
+  template<typename T, typename ...ArgT>
+  struct BindHelper<void(T::*)(ArgT...)>
+  {
+    template< void(T::*F)(ArgT...)>
+    static
+      inline
+      BindDelegate Bind(const char* name)
+    {
+
+
+      PyCFunctionWithKeywords func = [](PyObject* self, PyObject* args, PyObject* keywords)
+      {
+        static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
+
+        BaseBindObject<T>* typedSelf = reinterpret_cast<BaseBindObject<T>*>(self);
+        std::tuple<ArgT...> arguments;
+        if(CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        {
+          CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::Call(typedSelf->ptr, arguments, gens<sizeof...(ArgT)>::type());
+        }
+
+        Py_INCREF(Py_None);
+        return Py_None;
+
+      };
+      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+    }
+
+
+  };
+
   template<typename RT, typename ...ArgT>
   constexpr
     BindHelper<RT( ArgT... )> Bind( RT( *F )( ArgT... ) )
