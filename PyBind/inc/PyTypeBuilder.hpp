@@ -12,6 +12,13 @@ namespace pyb
     T* ptr;
   };
 
+  struct BindDelegate
+  {
+    bool ClassBinding;
+    PyCFunction Function;
+    const char* Name;
+  };
+
   template<typename T>
   struct PyTypeTrait
   {
@@ -257,7 +264,7 @@ namespace pyb
     template< RT( *F )( ArgT... ) >
     static
       inline
-      PyCFunction Bind()
+      BindDelegate Bind( const char* name)
     {
 
 
@@ -274,7 +281,7 @@ namespace pyb
         Py_INCREF( Py_None );
         return Py_None;
       };
-      return reinterpret_cast< PyCFunction >( func );
+      return BindDelegate{false, reinterpret_cast<PyCFunction>(func), name};
     }
   };
 
@@ -285,7 +292,7 @@ namespace pyb
     template< RT( T::*F )( ArgT... ) >
     static
       inline
-      PyCFunction Bind()
+      BindDelegate Bind( const char* name)
     {
 
 
@@ -304,7 +311,7 @@ namespace pyb
         Py_INCREF( Py_None );
         return Py_None;
       };
-      return reinterpret_cast< PyCFunction >( func );
+      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
 
 
@@ -317,7 +324,7 @@ namespace pyb
     template< RT( T::*F )( ArgT... ) const>
     static
       inline
-      PyCFunction Bind()
+      BindDelegate Bind(const char* name)
     {
 
 
@@ -336,7 +343,7 @@ namespace pyb
         Py_INCREF( Py_None );
         return Py_None;
       };
-      return reinterpret_cast< PyCFunction >( func );
+      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
 
 

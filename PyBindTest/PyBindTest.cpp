@@ -38,15 +38,17 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.RegisterModule( &module );
 
-  module.AddFunction( PY_BIND_FUNCTION( test ), "t" );
-  module.AddFunction( PY_BIND_FUNCTION( test2 ), "t2" );
-  module.AddFunction( PY_BIND_FUNCTION( Test::test ), "t3" );
+  module.AddFunction( PY_BIND_FUNCTION( test ) );
+  module.AddFunction( PY_BIND_FUNCTION( test2 ));
+  module.AddFunction( PY_BIND_FUNCTION_NAMED( Test::test, "test" ) );
 
   interpreter.RunPyMain( argc, argv );
 
   //Test t;
 
   //pyb::BindMethodHelper<Test>::Bind<&Test::test>("test");
+
+  PyTypeObject classDef;
 
 
 

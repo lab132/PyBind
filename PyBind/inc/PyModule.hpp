@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PyBindCommon.hpp"
+#include "PyTypeBuilder.hpp"
 #include <vector>
 
 namespace pyb
@@ -17,7 +18,7 @@ namespace pyb
     const void SetName(const std::string& name);
 
     bool IsRegistered() const;
-    void AddFunction( PyCFunction function, const char* name );
+    void AddFunction( const BindDelegate& bindDelegate);
 
     friend class Interpreter;
   private:
@@ -86,8 +87,6 @@ namespace pyb
 
     PyDict_SetItemString( moduleDict.ObjectPtr(), m_Name.c_str(), m_Module.ObjectPtr() );
 
-
-
   }
 
   inline void Module::AppendFunction( const PyMethodDef & def )
@@ -102,10 +101,10 @@ namespace pyb
   }
 
   inline
-  void pyb::Module::AddFunction( PyCFunction function, const char * name )
+  void pyb::Module::AddFunction( const BindDelegate& bindDelegate )
   {
 
-    AppendFunction( { name, function, METH_VARARGS| METH_KEYWORDS, name } );
+    AppendFunction( { bindDelegate.Name, bindDelegate.Function, METH_VARARGS| METH_KEYWORDS, bindDelegate.Name } );
     // Redefine all function, because the vector might have resized and definitions have moved in memory
     int result = PyModule_AddFunctions( m_Module.ObjectPtr(), m_MethodDefinitions.data() );
 
