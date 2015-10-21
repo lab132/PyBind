@@ -144,6 +144,41 @@ namespace pyb
     typedef seq<S...> type;
   };
 
+  // Call Helper for functions
+  template<typename ...ArgT>
+  struct ArgumentHelper
+  {
+    template<size_t ...S>
+    static
+      inline
+      bool ParseArguments(const std::string& argumentString, PyObject* object, std::tuple<ArgT...>& arguments, seq<S...>)
+    {
+      int result = PyArg_ParseTuple(object, argumentString.c_str(), &std::get<S>(arguments)...);
+
+      if(result == 0)
+      {
+        printf("Could not parse arguments, expected: (%s)\n", BuildVerboseFunctionArgumentString<ArgT...>().c_str());
+        PyErr_Clear();
+        return false;
+      }
+      return true;
+    }
+  };
+
+
+  // Call helper for constructors
+  template<typename T, typename ...ArgT>
+  struct CtorCallHelper
+  {
+    template<size_t ...S>
+    static
+      inline
+      void Call(T* obj, const std::tuple<ArgT...>& arguments, seq<S...>)
+    {
+      return new (obj)(std::get<S>(arguments)...);
+    }
+  };
+
   template<typename ...>
   struct CallHelper
   {
@@ -198,22 +233,6 @@ namespace pyb
       {
         return ( obj->*F )( std::get<S>( arguments )... );
       }
-
-      template<size_t ...S>
-      static
-        inline
-        bool ParseArguments( const std::string& argumentString, PyObject* object, std::tuple<ArgT...>& arguments, seq<S...> )
-      {
-        int result = PyArg_ParseTuple( object, argumentString.c_str(), &std::get<S>( arguments )... );
-
-        if( result == 0 )
-        {
-          printf( "Could not parse arguments, expected: (%s)\n", BuildVerboseFunctionArgumentString<ArgT...>().c_str() );
-          PyErr_Clear();
-          return false;
-        }
-        return true;
-      }
     };
   };
 
@@ -230,22 +249,6 @@ namespace pyb
         RT Call( T* obj, const std::tuple<ArgT...>& arguments, seq<S...> )
       {
         return ( obj->*F )( std::get<S>( arguments )... );
-      }
-
-      template<size_t ...S>
-      static
-        inline
-        bool ParseArguments( const std::string& argumentString, PyObject* object, std::tuple<ArgT...>& arguments, seq<S...> )
-      {
-        int result = PyArg_ParseTuple( object, argumentString.c_str(), &std::get<S>( arguments )... );
-
-        if( result == 0 )
-        {
-          printf( "Could not parse arguments, expected: (%s)\n", BuildVerboseFunctionArgumentString<ArgT...>().c_str() );
-          PyErr_Clear();
-          return false;
-        }
-        return true;
       }
     };
   };
@@ -311,7 +314,7 @@ namespace pyb
         std::tuple<ArgT...> arguments;
 
 
-        if(CallHelper<void, ArgT...>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
            CallHelper<void, ArgT...>::CallTypeHelper<F>::Call(arguments, gens<sizeof...(ArgT)>::type());
         }
@@ -340,7 +343,7 @@ namespace pyb
         BaseBindObject* typedSelf = reinterpret_cast< BaseBindObject* >( self );
 
         std::tuple<ArgT...> arguments;
-        if(CallHelper<RT (T::*)(ArgT...)>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
           RT result;
           result = CallHelper<RT(T::*)(ArgT...)>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), arguments, gens<sizeof...(ArgT)>::type());
@@ -377,7 +380,7 @@ namespace pyb
         BaseBindObject* typedSelf = reinterpret_cast< BaseBindObject* >( self );
 
         std::tuple<ArgT...> arguments;
-        if(CallHelper<RT(T::*)(ArgT...) const>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
           RT result;
           result = CallHelper<RT (T::*)(ArgT...) const>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), arguments, gens<sizeof...(ArgT)>::type());
@@ -413,7 +416,7 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
         std::tuple<ArgT...> arguments;
-        if(CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
           CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), arguments, gens<sizeof...(ArgT)>::type());
         }
@@ -444,7 +447,7 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
         std::tuple<ArgT...> arguments;
-        if(CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
           CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::Call( reinterpret_cast<T*>( typedSelf->ptr ), arguments, gens<sizeof...(ArgT)>::type());
         }
