@@ -12,6 +12,8 @@ namespace pyb
   {
   public:
 
+    virtual ~BaseTypeObject();
+
     std::vector<PyMethodDef> m_MethodDefs;
 
     void RegisterAtModule(Module& module);
@@ -39,7 +41,7 @@ namespace pyb
     m_Binding = {
       PyVarObject_HEAD_INIT(NULL, 0)
       name,
-      sizeof(T),
+      sizeof(BaseBindObject),
       0,                         /* tp_itemsize */
       0,                         /* tp_dealloc */
       0,                         /* tp_print */
@@ -72,6 +74,17 @@ namespace pyb
 
       return reinterpret_cast<PyObject*>(newObj);
     };
+
+    m_Binding.tp_dealloc = [](PyObject* obj)
+    {
+      PYB_ASSERT(obj);
+
+      BaseBindObject* typedObj = reinterpret_cast<BaseBindObject*>(obj);
+      delete typedObj->ptr;
+      typedObj->ptr = nullptr;
+
+      obj->ob_type->tp_free(obj);
+    };
   }
 
   template<typename T>
@@ -84,9 +97,15 @@ namespace pyb
     m_Binding.tp_methods = m_MethodDefs.data();
   }
 
+  inline BaseTypeObject::~BaseTypeObject()
+  {
+    //Py_DECREF(&m_Binding);
+  }
+
   inline
   void BaseTypeObject::RegisterAtModule(Module & module)
   {
     PyType_Ready(&m_Binding);
+    Py_INCREF(&m_Binding);
   }
 }

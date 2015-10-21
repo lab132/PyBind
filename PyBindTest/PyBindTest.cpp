@@ -47,7 +47,7 @@ int _tmain( int argc, wchar_t* argv [] )
   module.AddFunction( PY_BIND_FUNCTION( test2 ));
 
 
-  pyb::TypeObject<Test> classDef = pyb::TypeObject<Test>("test");
+  pyb::TypeObject<Test> classDef = pyb::TypeObject<Test>("testobj");
   classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::setA, "setA"));
   classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::getValue, "getValue"));
 
