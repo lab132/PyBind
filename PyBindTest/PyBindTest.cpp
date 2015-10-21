@@ -7,9 +7,14 @@
 
 struct Test
 {
-  void test() const
+  int a;
+  void setA(int value)
   {
-    printf( "YAY!!!" );
+    a = value;
+  }
+  int getValue() const
+  {
+    return a;
   }
 };
 
@@ -40,7 +45,13 @@ int _tmain( int argc, wchar_t* argv [] )
 
   module.AddFunction( PY_BIND_FUNCTION( test ) );
   module.AddFunction( PY_BIND_FUNCTION( test2 ));
-  module.AddFunction( PY_BIND_FUNCTION_NAMED( Test::test, "test" ) );
+
+
+  pyb::TypeObject<Test> classDef = pyb::TypeObject<Test>("test");
+  classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::setA, "setA"));
+  classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::getValue, "getValue"));
+
+  module.AddType(&classDef);
 
   interpreter.RunPyMain( argc, argv );
 
@@ -48,7 +59,6 @@ int _tmain( int argc, wchar_t* argv [] )
 
   //pyb::BindMethodHelper<Test>::Bind<&Test::test>("test");
 
-  PyTypeObject classDef;
 
 
 

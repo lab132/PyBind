@@ -2,6 +2,8 @@
 
 #include "PyBindCommon.hpp"
 #include "PyTypeBuilder.hpp"
+#include "PyTypeObject.hpp"
+#include "PyObject.hpp"
 #include <vector>
 
 namespace pyb
@@ -19,6 +21,8 @@ namespace pyb
 
     bool IsRegistered() const;
     void AddFunction( const BindDelegate& bindDelegate);
+    void AddType(BaseTypeObject* typeObject);
+    const Object& GetObject() const;
 
     friend class Interpreter;
   private:
@@ -38,28 +42,34 @@ namespace pyb
     PyModuleDef m_ModuleDef;
 
     std::vector<PyMethodDef> m_MethodDefinitions;
+    std::vector<BaseTypeObject*> m_RegisteredTypes;
   };
 
-  inline pyb::Module::Module( const std::string& name, const std::string& documentation ) :
+  inline
+  pyb::Module::Module( const std::string& name, const std::string& documentation ) :
     m_Name(name),
     m_Documentation(documentation),
-    m_Registered(false)
+    m_Registered(false),
+    m_RegisteredTypes()
   {
     m_MethodDefinitions.push_back( {nullptr,nullptr,0,nullptr} );
   }
 
-  inline const void pyb::Module::SetName( const std::string & name )
+  inline
+  const void pyb::Module::SetName( const std::string & name )
   {
     assert( m_Registered == false );
     m_Name = name;
   }
 
-  inline bool Module::IsRegistered() const
+  inline
+  bool Module::IsRegistered() const
   {
     return m_Registered;
   }
 
-  inline const std::string & Module::Name() const
+  inline
+  const std::string & Module::Name() const
   {
     return m_Name;
   }
@@ -89,13 +99,15 @@ namespace pyb
 
   }
 
-  inline void Module::AppendFunction( const PyMethodDef & def )
+  inline
+  void Module::AppendFunction( const PyMethodDef & def )
   {
     memcpy( m_MethodDefinitions.data() + m_MethodDefinitions.size() - 1, &def, sizeof( PyMethodDef ) );
     WriteMethodSentinel();
   }
 
-  inline void Module::WriteMethodSentinel()
+  inline
+  void Module::WriteMethodSentinel()
   {
     m_MethodDefinitions.push_back( { nullptr,nullptr,0,nullptr } );
   }
@@ -110,6 +122,23 @@ namespace pyb
 
     assert( result == 0 );
 
+
+  }
+
+  inline
+  const Object& pyb::Module::GetObject() const
+  {
+    return m_Module;
+  }
+
+  inline
+  void pyb::Module::AddType(BaseTypeObject* typeObject)
+  {
+    typeObject->RegisterAtModule(*this);
+
+    m_RegisteredTypes.push_back(typeObject);
+
+    PyModule_AddObject(m_Module.ObjectPtr(), typeObject->m_Binding.tp_name, reinterpret_cast<PyObject*> (&typeObject->m_Binding));
 
   }
 
