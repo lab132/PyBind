@@ -462,6 +462,32 @@ namespace pyb
 
   };
 
+  // Bind helper for const methods
+  template<typename T, typename ...ArgT>
+  struct CtorHelper
+  {
+    static
+      inline
+      BindDelegate Bind()
+    {
+
+      newfunc func = [](PyTypeObject* self, PyObject* args, PyObject* keywords)
+      {
+
+        BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>(classDef->tp_alloc(classDef, 0));
+
+        //TODO
+        newObj->ptr = new T();
+
+        return reinterpret_cast<PyObject*>(newObj);
+
+      };
+      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+    }
+
+
+  };
+
   template<typename RT, typename ...ArgT>
   constexpr
     BindHelper<RT( ArgT... )> Bind( RT( *F )( ArgT... ) )
