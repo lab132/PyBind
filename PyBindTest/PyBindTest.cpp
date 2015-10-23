@@ -9,7 +9,7 @@ struct Test
 {
   int a;
 
-  Test(int a);
+  Test(int a, int b);
 
   void setA(int value)
   {
@@ -21,7 +21,7 @@ struct Test
   }
 };
 
-Test::Test(int a)
+Test::Test(int a, int b)
 {
   this->a = a;
 }
@@ -58,7 +58,7 @@ int _tmain( int argc, wchar_t* argv [] )
   pyb::TypeObject<Test> classDef = pyb::TypeObject<Test>("testobj");
   classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::setA, "setA"));
   classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::getValue, "getValue"));
-  classDef.SetConstructor(pyb::CtorHelper<Test, int>::Bind());
+  classDef.SetConstructor( PY_BIND_CTOR( Test, int, int ) );
 
   module.AddType(&classDef);
 

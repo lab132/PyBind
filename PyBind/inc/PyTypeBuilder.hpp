@@ -463,9 +463,10 @@ namespace pyb
   };
 
   // Bind helper for const methods
-  template<typename T, typename ...ArgT>
+  template<typename T>
   struct CtorHelper
   {
+    template<typename ...ArgT>
     static
       inline
       BindDelegate Bind()
