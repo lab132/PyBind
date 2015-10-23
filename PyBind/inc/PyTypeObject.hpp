@@ -29,6 +29,8 @@ namespace pyb
 
     void AddMethod(const BindDelegate& deleg);
 
+    void SetConstructor(const BindDelegate& deleg);
+
     friend class Module;
   private:
 
@@ -70,7 +72,7 @@ namespace pyb
 
       BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>( classDef->tp_alloc(classDef, 0));
 
-      newObj->ptr = new T();
+      newObj->ptr = malloc(sizeof(T));
 
       return reinterpret_cast<PyObject*>(newObj);
     };
@@ -80,7 +82,7 @@ namespace pyb
       PYB_ASSERT(obj);
 
       BaseBindObject* typedObj = reinterpret_cast<BaseBindObject*>(obj);
-      delete typedObj->ptr;
+      free(typedObj->ptr);
       typedObj->ptr = nullptr;
 
       obj->ob_type->tp_free(obj);
@@ -95,6 +97,13 @@ namespace pyb
     m_MethodDefs.push_back({nullptr, nullptr, 0, nullptr});
 
     m_Binding.tp_methods = m_MethodDefs.data();
+  }
+
+  template<typename T>
+  inline
+  void TypeObject<T>::SetConstructor(const BindDelegate & deleg)
+  {
+    m_Binding.tp_init = reinterpret_cast<initproc>(deleg.Function);
   }
 
   inline BaseTypeObject::~BaseTypeObject()

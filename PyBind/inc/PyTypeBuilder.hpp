@@ -175,7 +175,7 @@ namespace pyb
       inline
       void Call(T* obj, const std::tuple<ArgT...>& arguments, seq<S...>)
     {
-      return new (obj)(std::get<S>(arguments)...);
+      new (obj) T( std::get<S>(arguments)... );
     }
   };
 
@@ -471,18 +471,26 @@ namespace pyb
       BindDelegate Bind()
     {
 
-      newfunc func = [](PyTypeObject* self, PyObject* args, PyObject* keywords)
+      initproc func = [](PyObject* self, PyObject* args, PyObject* keywords)
       {
+        static std::string argumenString = BuildFunctionArgumentString<ArgT...>();
 
-        BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>(classDef->tp_alloc(classDef, 0));
+        BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>(self);
 
-        //TODO
-        newObj->ptr = new T();
+        std::tuple<ArgT...> arguments;
 
-        return reinterpret_cast<PyObject*>(newObj);
+        if(ArgumentHelper<ArgT...>::ParseArguments(argumenString, args, arguments, gens<sizeof...(ArgT)>::type()))
+        {
+          CtorCallHelper<T, ArgT...>::Call(static_cast<T*>( newObj->ptr ), arguments, gens<sizeof...(ArgT)>::type());
+          return 0;
+        }
+        else
+        {
+          return -1;
+        }
 
       };
-      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), nullptr};
     }
 
 
