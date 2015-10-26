@@ -96,6 +96,57 @@ namespace pyb
 
   }
 
+  template<typename T>
+  struct ArgumentTypeHelper
+  {
+    typedef T Type;
+    typedef T WrappedType;
+
+    constexpr
+    static
+    inline
+    WrappedType Convert(Type t)
+    {
+      return t;
+    }
+  };
+
+  template<>
+  struct ArgumentTypeHelper<const char*>
+  {
+    typedef const char* Type;
+    typedef const char* WrappedType;
+
+    static
+      inline
+      WrappedType Convert(Type t)
+    {
+      return t;
+    }
+  };
+
+  template<typename T>
+  struct ArgumentTypeHelper<T*>
+  {
+    typedef BaseBindObject* Type;
+    typedef T* WrappedType;
+
+    static
+    inline
+    WrappedType Convert(Type t)
+    {
+      return reinterpret_cast<WrappedType>(t->ptr);
+    }
+  };
+
+  template<typename A, typename B>
+  void Set(A& from, B& to)
+  {
+    to = ArgumentTypeHelper<B>::Convert(from);
+  }
+
+
+
   template<int ...>
   struct seq
   {
@@ -112,6 +163,25 @@ namespace pyb
     typedef seq<S...> type;
   };
 
+  template<typename ...Arg1>
+  struct TupleConvertHelper
+  {
+    template<typename ...Arg2>
+    struct TupleHelper
+    {
+      template<size_t ...S>
+      inline
+        static
+        void ConvertTo(std::tuple<Arg1...>& from, std::tuple<Arg2...>& to, seq<S...>)
+      {
+        using expander = int [];
+        expander{0,
+          (void(Set(std::get<S>(from),std::get<S>(to))), 0)...
+        };
+      }
+    };
+  };
+
   // Call Helper for functions
   template<typename ...ArgT>
   struct ArgumentHelper
@@ -119,7 +189,7 @@ namespace pyb
     template<size_t ...S>
     static
       inline
-      bool ParseArguments(const std::string& argumentString, PyObject* object, std::tuple<ArgT...>& arguments, seq<S...>)
+      bool ParseArguments(const std::string& argumentString, PyObject* object, std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >& arguments, seq<S...>)
     {
       int result = PyArg_ParseTuple(object, argumentString.c_str(), &std::get<S>(arguments)...);
 
@@ -166,23 +236,6 @@ namespace pyb
       RT Call( const std::tuple<ArgT...>& arguments, seq<S...> )
       {
         return ( *F )( std::get<S>( arguments )... );
-      }
-
-      template<size_t ...S>
-      static
-      inline
-      bool ParseArguments( const std::string& argumentString, PyObject* object, std::tuple<ArgT...>& arguments, seq<S...> )
-      {
-        int result = PyArg_ParseTuple( object, argumentString.c_str(), &std::get<S>( arguments )... );
-
-        if( result == 0 )
-        {
-          printf( "Could not parse arguments, expected: (%s)\n", BuildVerboseFunctionArgumentString<ArgT...>().c_str() );
-          PyErr_Clear();
-
-          return false;
-        }
-        return true;
       }
     };
   };
@@ -242,10 +295,10 @@ namespace pyb
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
-        std::tuple<ArgT...> arguments;
+        std::tuple< decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
 
 
-        if( CallHelper<RT, ArgT...>::CallTypeHelper<F>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
+        if( ArgumentHelper<ArgT...>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
         {
           RT result;
           result = CallHelper<RT, ArgT...>::CallTypeHelper<F>::Call( arguments, gens<sizeof...( ArgT )>::type() );
@@ -279,12 +332,14 @@ namespace pyb
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
-        std::tuple<ArgT...> arguments;
-
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
 
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-           CallHelper<void, ArgT...>::CallTypeHelper<F>::Call(arguments, gens<sizeof...(ArgT)>::type());
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
+          CallHelper<void, ArgT...>::CallTypeHelper<F>::Call(finalArguments, gens<sizeof...(ArgT)>::type());
         }
 
         Py_INCREF(Py_None);
@@ -310,11 +365,15 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast< BaseBindObject* >( self );
 
-        std::tuple<ArgT...> arguments;
+
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
           RT result;
-          result = CallHelper<RT(T::*)(ArgT...)>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), arguments, gens<sizeof...(ArgT)>::type());
+          result = CallHelper<RT(T::*)(ArgT...)>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<sizeof...(ArgT)>::type());
 
           PyObject* obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
           return obj;
@@ -347,11 +406,15 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast< BaseBindObject* >( self );
 
-        std::tuple<ArgT...> arguments;
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
           RT result;
-          result = CallHelper<RT (T::*)(ArgT...) const>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), arguments, gens<sizeof...(ArgT)>::type());
+          result = CallHelper<RT (T::*)(ArgT...) const>::CallTypeHelper<F>::Call(
+            reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<sizeof...(ArgT)>::type());
 
           PyObject* obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
           return obj;
@@ -383,10 +446,16 @@ namespace pyb
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
-        std::tuple<ArgT...> arguments;
+
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), arguments, gens<sizeof...(ArgT)>::type());
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
+
+          CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::Call(
+            reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<sizeof...(ArgT)>::type());
         }
 
         Py_INCREF(Py_None);
@@ -414,10 +483,17 @@ namespace pyb
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
-        std::tuple<ArgT...> arguments;
+
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
+
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::Call( reinterpret_cast<T*>( typedSelf->ptr ), arguments, gens<sizeof...(ArgT)>::type());
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
+
+          CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::Call(
+            reinterpret_cast<T*>( typedSelf->ptr ), finalArguments, gens<sizeof...(ArgT)>::type());
         }
 
         Py_INCREF(Py_None);
@@ -446,11 +522,15 @@ namespace pyb
 
         BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>(self);
 
-        std::tuple<ArgT...> arguments;
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
 
         if(ArgumentHelper<ArgT...>::ParseArguments(argumenString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          CtorCallHelper<T, ArgT...>::Call(static_cast<T*>( newObj->ptr ), arguments, gens<sizeof...(ArgT)>::type());
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
+
+          CtorCallHelper<T, ArgT...>::Call(static_cast<T*>( newObj->ptr ), finalArguments, gens<sizeof...(ArgT)>::type());
           return 0;
         }
         else

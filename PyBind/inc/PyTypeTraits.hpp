@@ -108,7 +108,7 @@ namespace pyb
   template<typename T>
   struct PyTypeTrait<T*>
   {
-    static constexpr const char* PyTypeString = "o";
+    static constexpr const char* PyTypeString = "O";
     static constexpr const char* PyVerboseString = "pointer";
   };
 }

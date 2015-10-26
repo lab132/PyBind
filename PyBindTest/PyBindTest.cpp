@@ -33,9 +33,9 @@ int test2( int a, int b)
   return a + b;
 }
 
-void test(int a, int b, const char* string)
+void test(int a, int b, Test* t)
 {
-  printf( "Got %d, %d and %s\n", a,b,string );
+  printf( "Got %d, %d and %d\n", a,b,t->a);
 }
 
 int _tmain( int argc, wchar_t* argv [] )
