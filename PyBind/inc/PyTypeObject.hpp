@@ -30,6 +30,7 @@ namespace pyb
     void AddMethod(const BindDelegate& deleg);
 
     void SetConstructor(const BindDelegate& deleg);
+    void SetDefaultConstructor();
 
     friend class Module;
   private:
@@ -104,6 +105,24 @@ namespace pyb
   void TypeObject<T>::SetConstructor(const BindDelegate & deleg)
   {
     m_Binding.tp_init = reinterpret_cast<initproc>(deleg.Function);
+  }
+
+  template<typename T>
+  inline void TypeObject<T>::SetDefaultConstructor()
+  {
+    initproc func = [](PyObject* self, PyObject* args, PyObject* keywords)
+    {
+      BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>(self);
+
+      T* obj = reinterpret_cast<T*>(newObj->ptr);
+
+      new (obj)T();
+
+      return 0;
+
+    };
+
+    m_Binding.tp_init = func;
   }
 
   inline BaseTypeObject::~BaseTypeObject()
