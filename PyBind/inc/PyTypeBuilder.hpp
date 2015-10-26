@@ -295,13 +295,17 @@ namespace pyb
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
-        std::tuple< decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
 
+        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<ArgT...> finalArguments;
 
         if( ArgumentHelper<ArgT...>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
         {
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+            arguments, finalArguments, gens<sizeof...(ArgT)>::type());
+
           RT result;
-          result = CallHelper<RT, ArgT...>::CallTypeHelper<F>::Call( arguments, gens<sizeof...( ArgT )>::type() );
+          result = CallHelper<RT, ArgT...>::CallTypeHelper<F>::Call( finalArguments, gens<sizeof...( ArgT )>::type() );
 
           PyObject* obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
           return obj;
