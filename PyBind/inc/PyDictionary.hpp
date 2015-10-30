@@ -18,11 +18,11 @@ namespace pyb
     Object GetItem(const Object& key) const;
     Object GetItem(const std::string& key) const;
 
-    bool SetItem(const Object& key, const Object& value) const;
-    bool SetItem(const std::string& key, const Object& value) const;
+    bool SetObject(const Object& key, const Object& value) const;
+    bool SetObject(const std::string& key, const Object& value) const;
 
     template<typename T>
-    bool SetItemGeneric(const std::string& key, T value);
+    bool SetItem(const std::string& key, T value);
 
     void Clear();
 
@@ -70,13 +70,13 @@ namespace pyb
     return Object::FromBorrowed(PyDict_GetItemString(m_Dictionary.ObjectPtr(), key.c_str()));
   }
 
-  inline bool Dictionary::SetItem(const Object & key, const Object & value) const
+  inline bool Dictionary::SetObject(const Object & key, const Object & value) const
   {
     int result = PyDict_SetItem(m_Dictionary.ObjectPtr(), key.ObjectPtr(), value.ObjectPtr());
     return result == 0;
   }
 
-  inline bool Dictionary::SetItem(const std::string & key, const Object & value) const
+  inline bool Dictionary::SetObject(const std::string & key, const Object & value) const
   {
     int result = PyDict_SetItemString(m_Dictionary.ObjectPtr(), key.c_str(), value.ObjectPtr());
     return result == 0;
@@ -89,9 +89,9 @@ namespace pyb
   }
   template<typename T>
   inline
-  bool Dictionary::SetItemGeneric(const std::string & key, T value)
+  bool Dictionary::SetItem(const std::string & key, T value)
   {
     Object val = BuildValue<T>(value);
-    return SetItem(key, val);
+    return SetObject(key, val);
   }
 }

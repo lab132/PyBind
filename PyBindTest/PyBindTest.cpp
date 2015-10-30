@@ -52,7 +52,7 @@ int _tmain( int argc, wchar_t* argv [] )
 
   pyb::Dictionary dict = pyb::Dictionary::FromObject(obj);
 
-  dict.SetItemGeneric<int>("f", 3);
+  dict.SetItem("f", 3);
 
   pyb::Module module( "myTest", "some test module" );
 
