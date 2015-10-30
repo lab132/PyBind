@@ -23,6 +23,8 @@ namespace pyb
     */
     bool IsValid() const;
 
+    bool IsDictionary() const;
+
     /**
     @brief Creates new Object and owns it (incrementing the refCount)
     This should be used if a python API function returns a borrowed reference
@@ -77,6 +79,12 @@ namespace pyb
   inline bool Object::IsValid() const
   {
     return m_PyObject != nullptr;
+  }
+
+  inline
+  bool Object::IsDictionary() const
+  {
+    return PyDict_Check( m_PyObject );
   }
 
   inline

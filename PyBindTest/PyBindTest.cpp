@@ -44,9 +44,6 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.Initialize( argv[ 0 ] );
 
-  interpreter.RunString( "print(\"Hello\")" );
-
-
   pyb::Module module( "myTest", "some test module" );
 
   interpreter.RegisterModule( &module );

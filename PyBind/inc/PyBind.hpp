@@ -2,6 +2,7 @@
 
 #include "PyBindCommon.hpp"
 #include "PyObject.hpp"
+#include "PyDictionary.hpp"
 #include "PyInterpreter.hpp"
 #include "PyModule.hpp"
 #include "PyTypeBuilder.hpp"

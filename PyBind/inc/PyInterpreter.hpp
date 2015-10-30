@@ -62,7 +62,7 @@ namespace pyb
 
     @return A pointer to the owned module dictionary
     */
-    const Object* GetMainDict();
+    const Object& GetMainDict();
 
     void RegisterModule( Module* module );
 
@@ -103,11 +103,11 @@ namespace pyb
   {
     if( globals == nullptr )
     {
-      globals = GetMainDict();
+      globals = &GetMainDict();
     }
     if( locals == nullptr )
     {
-      locals = GetMainDict();
+      locals = &GetMainDict();
     }
 
     PyObject* obj = PyRun_String(
@@ -130,18 +130,18 @@ namespace pyb
 
     if( globals == nullptr )
     {
-      globals = GetMainDict();
+      globals = &GetMainDict();
     }
     if( locals == nullptr )
     {
-      locals = GetMainDict();
+      locals = &GetMainDict();
     }
 
     return Object::FromNewRef( PyRun_FileEx( file, fileName.c_str(), Py_file_input, globals->ObjectPtr(), locals->ObjectPtr(), 1 ) );
   }
 
   inline
-  const Object* Interpreter::GetMainDict()
+  const Object& Interpreter::GetMainDict()
   {
     if( !m_GlobalsDict.IsValid() )
     {
@@ -153,7 +153,7 @@ namespace pyb
       m_GlobalsDict = Object::FromBorrowed( globalsDict );
     }
 
-    return &m_GlobalsDict;
+    return m_GlobalsDict;
   }
 
   inline
