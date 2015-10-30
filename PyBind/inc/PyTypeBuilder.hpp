@@ -19,6 +19,7 @@ namespace pyb
     const char* Name;
   };
 
+
   template<typename ... ArgT>
   struct ArgumentStringHelper;
 
@@ -94,6 +95,15 @@ namespace pyb
   {
     return ArgumentStringHelper<ArgT...>::BuildVerboseString();
 
+  }
+
+
+  template< typename ... ArgT>
+  Object BuildValue(ArgT... arguments)
+  {
+    static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
+
+    return Object::FromNewRef(Py_BuildValue(argumentString.c_str(), arguments...));
   }
 
   template<typename T>
