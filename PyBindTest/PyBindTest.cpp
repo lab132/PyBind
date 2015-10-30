@@ -44,6 +44,16 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.Initialize( argv[ 0 ] );
 
+  interpreter.RunString("f = { 'a':1}");
+
+  auto obj = (interpreter.GetMainDict());
+
+  bool isDict = obj.IsDictionary();
+
+  pyb::Dictionary dict = pyb::Dictionary::FromObject(obj);
+
+  dict.SetItemGeneric<int>("f", 3);
+
   pyb::Module module( "myTest", "some test module" );
 
   interpreter.RegisterModule( &module );

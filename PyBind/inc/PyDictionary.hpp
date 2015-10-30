@@ -21,6 +21,9 @@ namespace pyb
     bool SetItem(const Object& key, const Object& value) const;
     bool SetItem(const std::string& key, const Object& value) const;
 
+    template<typename T>
+    bool SetItemGeneric(const std::string& key, T value);
+
     void Clear();
 
   private:
@@ -83,5 +86,12 @@ namespace pyb
   void Dictionary::Clear()
   {
     PyDict_Clear(m_Dictionary.ObjectPtr());
+  }
+  template<typename T>
+  inline
+  bool Dictionary::SetItemGeneric(const std::string & key, T value)
+  {
+    Object val = BuildValue<T>(value);
+    return SetItem(key, val);
   }
 }
