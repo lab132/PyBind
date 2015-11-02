@@ -27,8 +27,8 @@ namespace pyb
 
     bool IsCallable() const;
 
-    /*template<typename RT, typename ...ArgT>
-    RT Call(ArgT... args);*/
+    template<typename ...ArgT>
+    Object Call(ArgT... args);
 
     /**
     @brief Creates new Object and owns it (incrementing the refCount)

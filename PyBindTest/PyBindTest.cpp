@@ -44,7 +44,7 @@ int _tmain( int argc, wchar_t* argv [] )
 
   interpreter.Initialize( argv[ 0 ] );
 
-  interpreter.RunString("f = { 'a':1}");
+  interpreter.RunString("f = lambda n: print('Got {0}'.format(n))");
 
   auto obj = (interpreter.GetMainDict());
 
@@ -52,7 +52,9 @@ int _tmain( int argc, wchar_t* argv [] )
 
   pyb::Dictionary dict = pyb::Dictionary::FromObject(obj);
 
-  dict.SetItem("f", 3);
+  auto callable = dict.GetItem("f");
+
+  callable.Call(1);
 
   pyb::Module module( "myTest", "some test module" );
 

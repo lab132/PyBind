@@ -76,12 +76,17 @@ namespace pyb
 
     return *this;
   }
-  /*template<typename ...ArgT>
-  inline
-  Object Object::Call(ArgT ...args)
-  {
-  static std::string argumentString = "(" + BuildFunctionArgumentString<ArgT...>() + ")";
 
-  Object arglist = BuildValue()
-  }*/
+  template<typename ...ArgT>
+  inline
+    Object Object::Call(ArgT ...args)
+  {
+    PYB_ASSERT(IsCallable());
+
+    Object arglist = BuildValueTuple<ArgT...>(args...);
+
+    Object result = Object::FromNewRef(PyObject_Call(m_PyObject, arglist.m_PyObject, nullptr));
+
+    return result;
+  }
 }
