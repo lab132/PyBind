@@ -8,3 +8,10 @@
 #include "PyTypeBuilder.hpp"
 #include "PyTypeMacros.hpp"
 #include "PyTypeObject.hpp"
+
+
+#include "PyObject.inl"
+#include "PyDictionary.inl"
+#include "PyInterpreter.inl"
+#include "PyModule.inl"
+#include "PyTypeObject.inl"
