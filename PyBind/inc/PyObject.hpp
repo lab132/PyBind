@@ -25,6 +25,11 @@ namespace pyb
 
     bool IsDictionary() const;
 
+    bool IsCallable() const;
+
+    /*template<typename RT, typename ...ArgT>
+    RT Call(ArgT... args);*/
+
     /**
     @brief Creates new Object and owns it (incrementing the refCount)
     This should be used if a python API function returns a borrowed reference
@@ -88,6 +93,12 @@ namespace pyb
   }
 
   inline
+  bool Object::IsCallable() const
+  {
+    return PyCallable_Check(m_PyObject);
+  }
+
+  inline
     Object Object::FromBorrowed( PyObject * pyObject )
   {
     Object obj;
@@ -112,4 +123,12 @@ namespace pyb
 
     return *this;
   }
+  /*template<typename ...ArgT>
+  inline
+  Object Object::Call(ArgT ...args)
+  {
+    static std::string argumentString = "(" + BuildFunctionArgumentString<ArgT...>() + ")";
+
+    Object arglist = BuildValue()
+  }*/
 }
