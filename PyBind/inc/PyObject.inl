@@ -1,3 +1,4 @@
+#include "PyObject.hpp"
 #pragma once
 
 namespace pyb
@@ -49,6 +50,12 @@ namespace pyb
     bool Object::IsCallable() const
   {
     return PyCallable_Check(m_PyObject);
+  }
+
+  inline void Object::Invalidate()
+  {
+    Py_XDECREF(m_PyObject);
+    m_PyObject = nullptr;
   }
 
   inline

@@ -27,6 +27,8 @@ namespace pyb
 
     bool IsCallable() const;
 
+    void Invalidate();
+
     template<typename ...ArgT>
     Object Call(ArgT... args);
 

@@ -19,7 +19,7 @@ namespace pyb
     @brief Initializes the interpreter with the given programName.
     The interpreter is usable after this call.
     */
-    void Initialize( wchar_t* programName );
+    void Initialize( wchar_t* programName = nullptr );
 
     /**
     @brief Destroys the interpreter, freeing all resources.

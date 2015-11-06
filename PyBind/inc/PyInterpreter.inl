@@ -12,7 +12,10 @@ namespace pyb
   inline
     void Interpreter::Initialize(wchar_t* programName)
   {
-    Py_SetProgramName(programName);
+    if (programName)
+    {
+      Py_SetProgramName(programName);
+    }
 
     Py_Initialize();
   }
@@ -20,6 +23,7 @@ namespace pyb
   inline
     void Interpreter::Finalize()
   {
+    m_GlobalsDict.Invalidate();
     Py_Finalize();
   }
 
