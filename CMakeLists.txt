@@ -65,3 +65,16 @@ file(GLOB_RECURSE PyBindTests_SOURCES "${CMAKE_SOURCE_DIR}/PyBindTest/*.hpp"
 
 add_executable(PyBindTest ${PyBindTests_SOURCES})
 target_link_libraries(PyBindTest PUBLIC PyBind_Headers)
+
+
+target_include_directories(PyBind_Headers INTERFACE "${CMAKE_SOURCE_DIR}/PyBindUnit/inc")
+
+# PyBindUnit
+# ==========
+file(GLOB_RECURSE PyBindUnit_SOURCES "${CMAKE_SOURCE_DIR}/PyBindUnit/*.hpp"
+                                      "${CMAKE_SOURCE_DIR}/PyBindUnit/*.h"
+                                      "${CMAKE_SOURCE_DIR}/PyBindUnit/*.cpp"
+                                      )
+
+add_executable(PyBindUnit ${PyBindUnit_SOURCES})
+target_link_libraries(PyBindUnit PUBLIC PyBind_Headers)
