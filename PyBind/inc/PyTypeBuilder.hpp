@@ -129,6 +129,20 @@ namespace pyb
   };
 
   template<>
+  struct ArgumentTypeHelper<Object>
+  {
+    typedef PyObject* Type;
+    typedef Object WrappedType;
+
+    static
+      inline
+      WrappedType Convert(Type t)
+    {
+      return Object::FromBorrowed(t);
+    }
+  };
+
+  template<>
   struct ArgumentTypeHelper<const char*>
   {
     typedef const char* Type;
