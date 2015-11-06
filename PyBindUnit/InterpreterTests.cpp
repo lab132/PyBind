@@ -25,9 +25,9 @@ SCENARIO("Simple interpreter test", "[interpreter]")
     {
       auto result = interpreter.RunString("asldjhgalskdgj");
 
-      THEN("The result should be valid")
+      THEN("The result should be invalid")
       {
-        REQUIRE(result.IsValid());
+        REQUIRE(!result.IsValid());
       }
     }
 
