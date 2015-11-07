@@ -234,7 +234,7 @@ namespace pyb
     template<size_t ...S>
     static
       inline
-      bool ParseArguments(const std::string& argumentString, PyObject* object, std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >& arguments, seq<S...>)
+      bool ParseArguments(const std::string& argumentString, PyObject* object, std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >& arguments, seq<S...>)
     {
       int result = PyArg_ParseTuple(object, argumentString.c_str(), &std::get<S>(arguments)...);
 
@@ -341,12 +341,12 @@ namespace pyb
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
 
         if( ArgumentHelper<ArgT...>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
 
           RT result;
@@ -381,12 +381,12 @@ namespace pyb
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
 
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type())) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
           CallHelper<void, ArgT...>::CallTypeHelper<F>::Call(finalArguments, gens<sizeof...(ArgT)>::type());
         }
@@ -415,11 +415,11 @@ namespace pyb
         BaseBindObject* typedSelf = reinterpret_cast< BaseBindObject* >( self );
 
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
           RT result;
           result = CallHelper<RT(T::*)(ArgT...)>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<sizeof...(ArgT)>::type());
@@ -455,11 +455,11 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast< BaseBindObject* >( self );
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
           RT result;
           result = CallHelper<RT (T::*)(ArgT...) const>::CallTypeHelper<F>::Call(
@@ -496,11 +496,11 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
 
           CallHelper<void(T::*)(ArgT...) const>::CallTypeHelper<F>::Call(
@@ -533,12 +533,12 @@ namespace pyb
 
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
 
         if(ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
 
           CallHelper<void(T::*)(ArgT...)>::CallTypeHelper<F>::Call(
@@ -571,12 +571,12 @@ namespace pyb
 
         BaseBindObject* newObj = reinterpret_cast<BaseBindObject*>(self);
 
-        std::tuple<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ...> arguments;
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
 
         if(ArgumentHelper<ArgT...>::ParseArguments(argumenString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
-          TupleConvertHelper<decltype((ArgumentTypeHelper<ArgT>::Type)nullptr) ... >::TupleHelper<ArgT...>::ConvertTo(
+          TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
 
           CtorCallHelper<T, ArgT...>::Call(static_cast<T*>( newObj->ptr ), finalArguments, gens<sizeof...(ArgT)>::type());
