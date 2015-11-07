@@ -31,14 +31,14 @@ namespace pyb
   template<>
   struct PyTypeTrait<unsigned short>
   {
-    static constexpr const char* PyTypeString = "h";
+    static constexpr const char* PyTypeString = "H";
     static constexpr const char* PyVerboseString = "unsigned short";
   };
 
   template<>
   struct PyTypeTrait<short>
   {
-    static constexpr const char* PyTypeString = "H";
+    static constexpr const char* PyTypeString = "h";
     static constexpr const char* PyVerboseString = "short";
   };
 
