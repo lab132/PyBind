@@ -143,6 +143,20 @@ namespace pyb
   };
 
   template<>
+  struct ArgumentTypeHelper<std::string>
+  {
+    typedef const char* Type;
+    typedef std::string WrappedType;
+
+    static
+      inline
+      WrappedType Convert(Type t)
+    {
+      return std::string(t);
+    }
+  };
+
+  template<>
   struct ArgumentTypeHelper<const char*>
   {
     typedef const char* Type;
