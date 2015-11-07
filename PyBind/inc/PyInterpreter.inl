@@ -1,12 +1,19 @@
+#include "PyInterpreter.hpp"
 #pragma once
 
 namespace pyb
 {
 
   inline
-    Interpreter::Interpreter()
+    Interpreter::Interpreter():
+    m_Finalized(false)
   {
 
+  }
+
+  inline Interpreter::~Interpreter()
+  {
+    Finalize();
   }
 
   inline
@@ -23,8 +30,12 @@ namespace pyb
   inline
     void Interpreter::Finalize()
   {
-    m_GlobalsDict.Invalidate();
-    Py_Finalize();
+    if(!m_Finalized)
+    {
+      m_GlobalsDict.Invalidate();
+      Py_Finalize();
+      m_Finalized = true;
+    }
   }
 
   inline

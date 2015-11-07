@@ -15,6 +15,8 @@ namespace pyb
   public:
     Interpreter();
 
+    ~Interpreter();
+
     /**
     @brief Initializes the interpreter with the given programName.
     The interpreter is usable after this call.
@@ -67,6 +69,9 @@ namespace pyb
     void RegisterModule( Module* module );
 
   private:
+
+    bool m_Finalized;
+
     Object m_GlobalsDict;
 
     std::vector< Module* > m_Modules;
