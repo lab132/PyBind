@@ -8,7 +8,7 @@ namespace pyb
 {
   class BaseTypeObject;
   class Interpreter;
-  class BindDelegate;
+  struct BindDelegate;
 
   class Module
   {

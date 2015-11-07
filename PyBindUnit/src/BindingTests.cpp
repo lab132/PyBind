@@ -156,7 +156,7 @@ SCENARIO("Function bind Test", "[binding][function]")
           REQUIRE(calledFunction == true);
           REQUIRE(result.IsValid());
 
-          REQUIRE(f2Result.i == -2147483648);
+          REQUIRE(f2Result.i == -2147483647);
           REQUIRE(f2Result.b == 255);
           REQUIRE(f2Result.B == -127);
           REQUIRE(f2Result.H == 65535);

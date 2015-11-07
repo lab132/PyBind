@@ -49,7 +49,7 @@ namespace pyb
   inline
     bool Object::IsCallable() const
   {
-    return PyCallable_Check(m_PyObject);
+    return PyCallable_Check(m_PyObject) != 0;
   }
 
   inline void Object::Invalidate()

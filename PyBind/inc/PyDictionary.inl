@@ -20,7 +20,7 @@ namespace pyb
   inline
     bool Dictionary::ContainsKey(const Object & obj) const
   {
-    return PyDict_Contains(m_Dictionary.ObjectPtr(), obj.ObjectPtr());
+    return PyDict_Contains(m_Dictionary.ObjectPtr(), obj.ObjectPtr()) != 0;
   }
 
   inline
