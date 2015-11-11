@@ -84,7 +84,6 @@ namespace pyb
       new (obj)T();
 
       return 0;
-
     };
 
     m_Binding.tp_init = func;

@@ -9,7 +9,6 @@
 #include "PyTypeMacros.hpp"
 #include "PyTypeObject.hpp"
 
-
 #include "PyObject.inl"
 #include "PyDictionary.inl"
 #include "PyInterpreter.inl"

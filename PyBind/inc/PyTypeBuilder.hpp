@@ -39,7 +39,6 @@ namespace pyb
       return std::string( PyTypeTrait<T>::PyVerboseString ) + ", " + ArgumentStringHelper<ArgT...>::BuildVerboseString();
     }
 
-
   };
 
   template<typename T>
@@ -58,7 +57,6 @@ namespace pyb
     {
       return std::string( PyTypeTrait<T>::PyVerboseString );
     }
-
 
   };
 
@@ -79,23 +77,19 @@ namespace pyb
       return std::string( "" );
     }
 
-
   };
 
   template<typename ...ArgT>
   std::string BuildFunctionArgumentString()
   {
     return ArgumentStringHelper<ArgT...>::BuildString();
-
   }
 
   template<typename ...ArgT>
   std::string BuildVerboseFunctionArgumentString()
   {
     return ArgumentStringHelper<ArgT...>::BuildVerboseString();
-
   }
-
 
   template<typename ... ArgT>
   Object BuildValue(ArgT... arguments)
@@ -190,8 +184,6 @@ namespace pyb
     to = ArgumentTypeHelper<B>::Convert(from);
   }
 
-
-
   template<int ...>
   struct seq
   {
@@ -247,7 +239,6 @@ namespace pyb
       return true;
     }
   };
-
 
   // Call helper for constructors
   template<typename T, typename ...ArgT>
@@ -322,7 +313,6 @@ namespace pyb
   template <typename ...>
   struct BindHelper
   {
-
   };
 
   // Bind helper for functions
@@ -334,8 +324,6 @@ namespace pyb
       inline
       BindDelegate Bind( const char* name)
     {
-
-
       PyCFunctionWithKeywords func = []( PyObject* self, PyObject* args, PyObject* keywords )
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
@@ -375,8 +363,6 @@ namespace pyb
       inline
       BindDelegate Bind(const char* name)
     {
-
-
       PyCFunctionWithKeywords func = [](PyObject* self, PyObject* args, PyObject* keywords)
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
@@ -435,8 +421,6 @@ namespace pyb
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
-
-
   };
 
   // Bind helper for const methods
@@ -448,7 +432,6 @@ namespace pyb
       inline
       BindDelegate Bind(const char* name)
     {
-
       PyCFunctionWithKeywords func = []( PyObject* self, PyObject* args, PyObject* keywords )
       {
         static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
@@ -476,8 +459,6 @@ namespace pyb
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
-
-
   };
 
   // Bind helper for const methods
@@ -509,12 +490,9 @@ namespace pyb
 
         Py_INCREF(Py_None);
         return Py_None;
-
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
-
-
   };
 
   // Bind helper for const methods
@@ -547,12 +525,9 @@ namespace pyb
 
         Py_INCREF(Py_None);
         return Py_None;
-
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
     }
-
-
   };
 
   // Bind helper for const methods
@@ -586,12 +561,9 @@ namespace pyb
         {
           return -1;
         }
-
       };
       return BindDelegate{true, reinterpret_cast<PyCFunction>(func), nullptr};
     }
-
-
   };
 
   template<typename RT, typename ...ArgT>

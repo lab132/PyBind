@@ -60,13 +60,11 @@ void TestFunction2(
   calledFunction = true;
 }
 
-
 int TestFunction3(int a, int b)
 {
   calledFunction = true;
   return a + b;
 }
-
 
 int TestFunction4(Object a, Object b)
 {

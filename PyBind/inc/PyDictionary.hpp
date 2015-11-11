@@ -24,7 +24,6 @@ namespace pyb
     template<typename T>
     bool SetItem(const std::string& key, T value);
 
-
     template<typename T>
     T GetItem(const std::string & key);
 

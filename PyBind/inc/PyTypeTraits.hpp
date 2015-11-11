@@ -1,7 +1,6 @@
 #pragma once
 namespace pyb
 {
-
   template<typename T>
   struct PyTypeTrait
   {
@@ -97,7 +96,6 @@ namespace pyb
     static constexpr const char* PyTypeString = "d";
     static constexpr const char* PyVerboseString = "double";
   };
-
 
   template<>
   struct PyTypeTrait<Object>
