@@ -98,6 +98,14 @@ namespace pyb
     static constexpr const char* PyVerboseString = "double";
   };
 
+
+  template<>
+  struct PyTypeTrait<Object>
+  {
+    static constexpr const char* PyTypeString = "O";
+    static constexpr const char* PyVerboseString = "object";
+  };
+
   template<>
   struct PyTypeTrait<std::string>
   {
