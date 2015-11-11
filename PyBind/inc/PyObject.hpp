@@ -29,6 +29,9 @@ namespace pyb
 
     void Invalidate();
 
+    template<typename T>
+    T ToValue();
+
     template<typename ...ArgT>
     Object Call(ArgT... args);
 

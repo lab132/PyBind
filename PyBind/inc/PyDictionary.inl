@@ -59,6 +59,15 @@ namespace pyb
   {
     PyDict_Clear(m_Dictionary.ObjectPtr());
   }
+
+  template<typename T>
+  inline
+    T Dictionary::GetItem(const std::string & key)
+  {
+    Object obj = GetItem(key);
+    return obj.ToValue<T>();
+  }
+
   template<typename T>
   inline
     bool Dictionary::SetItem(const std::string & key, T value)

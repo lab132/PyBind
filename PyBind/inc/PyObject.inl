@@ -84,6 +84,14 @@ namespace pyb
     return *this;
   }
 
+  template<typename T>
+  inline T Object::ToValue()
+  {
+    T value;
+    PyArg_Parse(m_PyObject, BuildFunctionArgumentString<T>().c_str(), &value);
+    return value;
+  }
+
   template<typename ...ArgT>
   inline
     Object Object::Call(ArgT ...args)
