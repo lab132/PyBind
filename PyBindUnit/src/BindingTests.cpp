@@ -60,6 +60,12 @@ void TestFunction2(
   calledFunction = true;
 }
 
+int TestFunction3(int a, int b)
+{
+  calledFunction = true;
+  return a + b;
+}
+
 SCENARIO("Module bind Test", "[binding][module]")
 {
   GIVEN("An interpreter")
@@ -139,7 +145,7 @@ SCENARIO("Function bind Test", "[binding][function]")
         {
 
           auto result = interpreter.RunString("testModule.TestFunction2("
-            "-2147483648"
+            "-2147483647"
             ",255"
             ",-127"
             ",65535"
@@ -169,6 +175,25 @@ SCENARIO("Function bind Test", "[binding][function]")
           REQUIRE(f2Result.f == 3.4E+38f);
           REQUIRE(f2Result.d == 1.7E-308);
           REQUIRE(f2Result.str == "hello again");
+        }
+      }
+
+      WHEN("Binding a function with a return value")
+      {
+        REQUIRE(calledFunction == false);
+        module.AddFunction(PY_BIND_FUNCTION(TestFunction3));
+        REQUIRE(calledFunction == false);
+        THEN("It should return the expected value")
+        {
+          auto result = interpreter.RunString("f=testModule.TestFunction3(3,5)");
+          REQUIRE(calledFunction);
+          REQUIRE(result.IsValid());
+          auto mainDictObj = interpreter.GetMainDict();
+          REQUIRE(mainDictObj.IsValid());
+          REQUIRE(mainDictObj.IsDictionary());
+          Dictionary dict = Dictionary::FromObject(mainDictObj);
+          int resultInt = dict.GetItem<int>("f");
+          REQUIRE(resultInt == 8);
         }
       }
     }
