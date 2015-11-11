@@ -60,10 +60,20 @@ void TestFunction2(
   calledFunction = true;
 }
 
+
 int TestFunction3(int a, int b)
 {
   calledFunction = true;
   return a + b;
+}
+
+
+int TestFunction4(Object a, Object b)
+{
+  calledFunction = true;
+  REQUIRE(a.IsValid());
+  REQUIRE(b.IsValid());
+  return  Dictionary::FromObject(a).GetItem<int>("f") + Dictionary::FromObject(b).GetItem<int>("f");
 }
 
 SCENARIO("Module bind Test", "[binding][module]")
@@ -186,6 +196,25 @@ SCENARIO("Function bind Test", "[binding][function]")
         THEN("It should return the expected value")
         {
           auto result = interpreter.RunString("f=testModule.TestFunction3(3,5)");
+          REQUIRE(calledFunction);
+          REQUIRE(result.IsValid());
+          auto mainDictObj = interpreter.GetMainDict();
+          REQUIRE(mainDictObj.IsValid());
+          REQUIRE(mainDictObj.IsDictionary());
+          Dictionary dict = Dictionary::FromObject(mainDictObj);
+          int resultInt = dict.GetItem<int>("f");
+          REQUIRE(resultInt == 8);
+        }
+      }
+
+      WHEN("Binding a function with an object as parameter")
+      {
+        REQUIRE(calledFunction == false);
+        module.AddFunction(PY_BIND_FUNCTION(TestFunction4));
+        REQUIRE(calledFunction == false);
+        THEN("It should return the expected value")
+        {
+          auto result = interpreter.RunString("f=testModule.TestFunction4({'f':3},{'f':5})");
           REQUIRE(calledFunction);
           REQUIRE(result.IsValid());
           auto mainDictObj = interpreter.GetMainDict();
