@@ -546,30 +546,23 @@ namespace pyb
       inline
       BindGetSetDelegate Bind(const char* name)
     {
-
       setter setFunc = [](PyObject* self, PyObject* value, void* closure)
       {
         BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
 
-        std::tuple<ArgumentTypeHelper<ArgT>::Type> arguments;
         std::tuple<ArgT> finalArguments;
 
-        if(ArgumentHelper<ArgT>::ParseArguments(argumentString, args, arguments, gens<1>::type()))
-        {
-          TupleConvertHelper<ArgumentTypeHelper<ArgT>::Type>::TupleHelper<ArgT>::ConvertTo(
-            arguments, finalArguments, gens<1>::type());
+        std::get<ArgT>(finalArguments) = Object::FromBorrowed(value).ToValue<ArgT>();
 
-          CallHelper<void(T::*)(ArgT)>::CallTypeHelper<Setter>::Call(
-            reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<1>::type());
+        CallHelper<void(T::*)(ArgT)>::CallTypeHelper<Setter>::Call(
+          reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<1>::type());
 
-          return 0;
-        }
-        else
-        {
-          static std::string errorString = std::string("Expected value to be type of ") + PyTypeTrait<T>::PyVerboseString;
-          PyErr_SetString(PyExc_TypeError, errorString.c_str());
-          return -1;
-        }
+        return 0;
+
+        static std::string errorString = std::string("Expected value to be type of ") + PyTypeTrait<ArgT>::PyVerboseString;
+        PyErr_SetString(PyExc_TypeError, errorString.c_str());
+        return -1;
+
       };
 
       getter getFunc = [](PyObject* self, void* closure)
