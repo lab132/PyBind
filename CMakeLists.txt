@@ -45,6 +45,7 @@ target_include_directories(python35 INTERFACE "${PYTHON_3_DIR}/include")
 # ======
 file(GLOB_RECURSE PyBind_SOURCES "${CMAKE_SOURCE_DIR}/PyBind/inc/*.hpp"
                                  "${CMAKE_SOURCE_DIR}/PyBind/inc/*.h"
+                                 "${CMAKE_SOURCE_DIR}/PyBind/inc/*.inl"
                                  "${CMAKE_SOURCE_DIR}/PyBind/src/*.cpp"
                                  )
 
