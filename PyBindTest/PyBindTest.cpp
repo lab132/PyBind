@@ -11,11 +11,11 @@ struct Test
 
   Test(int a, int b);
 
-  void setA(int value)
+  void SetA(int value)
   {
     a = value;
   }
-  int getValue() const
+  int GetA() const
   {
     return a;
   }
@@ -63,10 +63,8 @@ int _tmain( int argc, wchar_t* argv [] )
   module.AddFunction( PY_BIND_FUNCTION( test ) );
   module.AddFunction( PY_BIND_FUNCTION( test2 ));
 
-
   pyb::TypeObject<Test> classDef = pyb::TypeObject<Test>("testobj");
-  classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::setA, "setA"));
-  classDef.AddMethod(PY_BIND_FUNCTION_NAMED(Test::getValue, "getValue"));
+  classDef.AddProperty(PY_BIND_PROPERTY(Test, A));
   classDef.SetConstructor( PY_BIND_CTOR( Test, int, int ) );
 
   module.AddType(&classDef);

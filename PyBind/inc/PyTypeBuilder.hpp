@@ -14,8 +14,14 @@ namespace pyb
 
   struct BindDelegate
   {
-    bool ClassBinding;
     PyCFunction Function;
+    const char* Name;
+  };
+
+  struct BindGetSetDelegate
+  {
+    setter Setter;
+    getter Getter;
     const char* Name;
   };
 
@@ -232,8 +238,9 @@ namespace pyb
 
       if(result == 0)
       {
-        printf("Could not parse arguments, expected: (%s)\n", BuildVerboseFunctionArgumentString<ArgT...>().c_str());
-        PyErr_Clear();
+        static std::string errorString = "Could not parse arguments, expected: " + BuildVerboseFunctionArgumentString<ArgT...>();
+        PyErr_SetString(PyExc_TypeError , errorString.c_str());
+        //PyErr_Clear();
         return false;
       }
       return true;
@@ -350,7 +357,7 @@ namespace pyb
         }
 
       };
-      return BindDelegate{false, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), name};
     }
   };
 
@@ -380,7 +387,7 @@ namespace pyb
         Py_INCREF(Py_None);
         return Py_None;
       };
-      return BindDelegate{false, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), name};
     }
   };
 
@@ -419,7 +426,7 @@ namespace pyb
           return Py_None;
         }
       };
-      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), name};
     }
   };
 
@@ -457,7 +464,7 @@ namespace pyb
           return Py_None;
         }
       };
-      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), name};
     }
   };
 
@@ -491,7 +498,7 @@ namespace pyb
         Py_INCREF(Py_None);
         return Py_None;
       };
-      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), name};
     }
   };
 
@@ -526,7 +533,107 @@ namespace pyb
         Py_INCREF(Py_None);
         return Py_None;
       };
-      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), name};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), name};
+    }
+  };
+
+  // Bind helper for getter/setter
+  template<typename T, typename ArgT>
+  struct BindHelper<void(T::*)(ArgT), ArgT(T::*)(void)>
+  {
+    template< void(T::*Setter)(ArgT), ArgT(T::*Getter)(void)>
+    static
+      inline
+      BindGetSetDelegate Bind(const char* name)
+    {
+
+      setter setFunc = [](PyObject* self, PyObject* value, void* closure)
+      {
+        BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
+
+        std::tuple<ArgumentTypeHelper<ArgT>::Type> arguments;
+        std::tuple<ArgT> finalArguments;
+
+        if(ArgumentHelper<ArgT>::ParseArguments(argumentString, args, arguments, gens<1>::type()))
+        {
+          TupleConvertHelper<ArgumentTypeHelper<ArgT>::Type>::TupleHelper<ArgT>::ConvertTo(
+            arguments, finalArguments, gens<1>::type());
+
+          CallHelper<void(T::*)(ArgT)>::CallTypeHelper<Setter>::Call(
+            reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<1>::type());
+
+          return 0;
+        }
+        else
+        {
+          static std::string errorString = std::string("Expected value to be type of ") + PyTypeTrait<T>::PyVerboseString;
+          PyErr_SetString(PyExc_TypeError, errorString.c_str());
+          return -1;
+        }
+      };
+
+      getter getFunc = [](PyObject* self, void* closure)
+      {
+        BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
+
+        std::tuple<> empty;
+
+        ArgT result = CallHelper<ArgT(T::*)(void)>::CallTypeHelper<Getter>::Call(
+          reinterpret_cast<T*>(typedSelf->ptr), empty, gens<0>::type());
+
+        Object createdValue = BuildValue<ArgT>(result);
+        Py_XINCREF(createdValue.ObjectPtr());
+        return createdValue.ObjectPtr();
+      };
+
+      return BindGetSetDelegate{setFunc, getFunc, name};
+    }
+  };
+
+  // Bind helper for const getter/setter
+  template<typename T, typename ArgT>
+  struct BindHelper<void(T::*)(ArgT), ArgT(T::*)(void) const>
+  {
+    template< void(T::*Setter)(ArgT), ArgT(T::*Getter)(void) const>
+    static
+      inline
+      BindGetSetDelegate Bind(const char* name)
+    {
+
+      setter setFunc = [](PyObject* self, PyObject* value, void* closure)
+      {
+        BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
+
+        std::tuple<ArgT> finalArguments;
+
+        std::get<ArgT>(finalArguments) = Object::FromBorrowed(value).ToValue<ArgT>();
+
+        CallHelper<void(T::*)(ArgT)>::CallTypeHelper<Setter>::Call(
+          reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<1>::type());
+
+        return 0;
+
+        static std::string errorString = std::string("Expected value to be type of ") + PyTypeTrait<ArgT>::PyVerboseString;
+        PyErr_SetString(PyExc_TypeError, errorString.c_str());
+        return -1;
+
+      };
+
+      getter getFunc = [](PyObject* self, void* closure)
+      {
+        BaseBindObject* typedSelf = reinterpret_cast<BaseBindObject*>(self);
+
+        std::tuple<> empty;
+
+        ArgT result = CallHelper<ArgT(T::*)(void) const>::CallTypeHelper<Getter>::Call(
+          reinterpret_cast<T*>(typedSelf->ptr), empty, gens<0>::type());
+
+        Object createdValue = BuildValue<ArgT>(result);
+        Py_XINCREF(createdValue.ObjectPtr());
+        return createdValue.ObjectPtr();
+      };
+
+      return BindGetSetDelegate{setFunc, getFunc, name};
     }
   };
 
@@ -562,7 +669,7 @@ namespace pyb
           return -1;
         }
       };
-      return BindDelegate{true, reinterpret_cast<PyCFunction>(func), nullptr};
+      return BindDelegate{reinterpret_cast<PyCFunction>(func), nullptr};
     }
   };
 
@@ -578,6 +685,20 @@ namespace pyb
     BindHelper<RT( T::* )( ArgT... )> Bind( RT( T::*F )( ArgT... ) )
   {
     return BindHelper<RT( T::* )( ArgT... )>();
+  }
+
+  template<typename T, typename ArgT>
+  constexpr
+    BindHelper<void(T::*)(ArgT), ArgT(T::*)(void)> Bind(void(T::*Setter)(ArgT), ArgT(T::*Getter)(void))
+  {
+    return BindHelper<void(T::*)(ArgT), ArgT(T::*)(void)>();
+  }
+
+  template<typename T, typename ArgT>
+  constexpr
+    BindHelper<void(T::*)(ArgT), ArgT(T::*)(void) const> Bind(void(T::*Setter)(ArgT), ArgT(T::*Getter)(void) const)
+  {
+    return BindHelper<void(T::*)(ArgT), ArgT(T::*)(void) const>();
   }
 
   template<typename T, typename RT, typename ...ArgT>

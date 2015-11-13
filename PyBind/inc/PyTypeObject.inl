@@ -1,3 +1,4 @@
+#include "PyTypeObject.hpp"
 #pragma once
 
 namespace pyb
@@ -31,6 +32,7 @@ namespace pyb
     };
 
     m_MethodDefs.push_back({nullptr, nullptr, 0, nullptr});
+    m_GetSetDefs.push_back({nullptr, nullptr, 0, nullptr, nullptr});
 
     m_Binding.tp_new = [](PyTypeObject* classDef, PyObject* args, PyObject* kwArgs)
     {
@@ -63,6 +65,15 @@ namespace pyb
     m_MethodDefs.push_back({nullptr, nullptr, 0, nullptr});
 
     m_Binding.tp_methods = m_MethodDefs.data();
+  }
+
+  template<typename T>
+  inline void TypeObject<T>::AddProperty(const BindGetSetDelegate & deleg)
+  {
+    m_GetSetDefs[m_MethodDefs.size() - 1] = PyGetSetDef{const_cast<char*>(deleg.Name), deleg.Getter, deleg.Setter, const_cast<char*>(deleg.Name), nullptr};
+    m_GetSetDefs.push_back({nullptr, nullptr, 0, nullptr, nullptr});
+
+    m_Binding.tp_getset = m_GetSetDefs.data();
   }
 
   template<typename T>

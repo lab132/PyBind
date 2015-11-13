@@ -15,6 +15,7 @@ namespace pyb
     virtual ~BaseTypeObject();
 
     std::vector<PyMethodDef> m_MethodDefs;
+    std::vector<PyGetSetDef> m_GetSetDefs;
 
     void RegisterAtModule(Module& module);
 
@@ -28,6 +29,7 @@ namespace pyb
     TypeObject(const char* name);
 
     void AddMethod(const BindDelegate& deleg);
+    void AddProperty(const BindGetSetDelegate& deleg);
 
     void SetConstructor(const BindDelegate& deleg);
     void SetDefaultConstructor();
