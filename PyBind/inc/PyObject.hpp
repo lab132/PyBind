@@ -29,6 +29,8 @@ namespace pyb
 
     void Invalidate();
 
+    bool IsNone() const;
+
     template<typename T>
     T ToValue();
 

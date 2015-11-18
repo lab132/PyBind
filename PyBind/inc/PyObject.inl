@@ -58,6 +58,11 @@ namespace pyb
     m_PyObject = nullptr;
   }
 
+  inline bool Object::IsNone() const
+  {
+    return m_PyObject == Py_None;
+  }
+
   inline
     Object Object::FromBorrowed(PyObject * pyObject)
   {
