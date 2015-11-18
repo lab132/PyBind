@@ -69,6 +69,30 @@ namespace pyb
   }
 
   inline
+    Object pyb::Interpreter::EvalString(const std::string & expression, const Object * globals, const Object * locals)
+  {
+    if(globals == nullptr)
+    {
+      globals = &GetMainDict();
+    }
+    if(locals == nullptr)
+    {
+      locals = &GetMainDict();
+    }
+
+    PyObject* obj = PyRun_String(
+      expression.c_str(),
+      Py_eval_input,
+      globals->ObjectPtr(),
+      locals->ObjectPtr());
+    if(obj == nullptr)
+    {
+      PyErr_Print();
+    }
+    return Object::FromNewRef(obj);
+  }
+
+  inline
     Object Interpreter::RunFile(const std::string & fileName, const Object * globals, const Object * locals)
   {
     FILE* file = fopen(fileName.c_str(), "r");

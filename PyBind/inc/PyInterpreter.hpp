@@ -43,12 +43,27 @@ namespace pyb
     void RunPyMain( int argc, wchar_t* argv [] );
 
     /**
+    @brief Feeds the string in the interpreter loop, usually for commands like import, with no return values.
+
+    The difference between EvalInput and RunString, is that RunString is fed into
+    the interpreter loop and no value of the (multiple) statements is returned.
+    Instead, None is returned it no exception raised during execution of the
+    statements. If an exception occurred an invalid object will be returned.
+
+    @param globals pass a custom globals dict, if nullptr is used it will be replaced with the __main__ module dict
+    @param locals pass a custom locals dict, if nullptr is used it will be replaced with the __main__ module dict
+    @return Invalid Object if an exception occurred during execution or None if successful.
+    */
+    Object RunString( const std::string& expression, const Object* globals = nullptr, const Object* locals = nullptr );
+
+    /**
+    @brief must be single python expression, the value of the expression is returned as PythonObject.
 
     @param globals pass a custom globals dict, if nullptr is used it will be replaced with the __main__ module dict
     @param locals pass a custom locals dict, if nullptr is used it will be replaced with the __main__ module dict
     @return the result of the python expression
     */
-    Object RunString( const std::string& expression, const Object* globals = nullptr, const Object* locals = nullptr );
+    Object EvalString(const std::string& expression, const Object* globals = nullptr, const Object* locals = nullptr);
 
     /**
 
