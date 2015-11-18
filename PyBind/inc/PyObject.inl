@@ -1,5 +1,6 @@
 #include "PyObject.hpp"
 #pragma once
+#include "PyTypeObject.hpp"
 
 namespace pyb
 {
@@ -61,6 +62,11 @@ namespace pyb
   inline bool Object::IsNone() const
   {
     return m_PyObject == Py_None;
+  }
+
+  inline bool Object::IsOfType(BaseTypeObject* type) const
+  {
+    return PyObject_IsInstance(m_PyObject, reinterpret_cast<PyObject*> (&type->m_Binding)) == 1;
   }
 
   inline

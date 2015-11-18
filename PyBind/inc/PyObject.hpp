@@ -4,6 +4,8 @@
 
 namespace pyb
 {
+  class BaseTypeObject;
+
   class Object
   {
   public:
@@ -30,6 +32,8 @@ namespace pyb
     void Invalidate();
 
     bool IsNone() const;
+
+    bool IsOfType(BaseTypeObject* type) const;
 
     template<typename T>
     T ToValue();
