@@ -58,7 +58,7 @@ namespace pyb
 
     PyObject* obj = PyRun_String(
       expression.c_str(),
-      Py_file_input,
+      Py_single_input,
       globals->ObjectPtr(),
       locals->ObjectPtr());
     if(obj == nullptr)
