@@ -21,6 +21,7 @@ namespace pyb
 
     PyTypeObject m_Binding;
     Module* m_RegisteredModule = nullptr;
+    void RegisterGetSetDefWithType(PyGetSetDef & newGetSetDef);
   };
 
   template <typename T>

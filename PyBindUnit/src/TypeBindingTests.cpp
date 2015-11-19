@@ -98,7 +98,6 @@ SCENARIO("Type Member Binding", "[binding][type][member]")
     {
       TypeObject<TestMemberType> obj("TestMemberType");
       obj.SetDefaultConstructor();
-      obj.AddProperty(PY_BIND_PROPERTY(TestMemberType, Var));
       mod.AddType(&obj);
 
       result = interpreter.RunString("testobj = testModule.TestMemberType()");
@@ -110,6 +109,7 @@ SCENARIO("Type Member Binding", "[binding][type][member]")
 
       WHEN("Binding a property to the object")
       {
+        obj.AddProperty(PY_BIND_PROPERTY(TestMemberType, Var));
         THEN("The property should be settable")
         {
           result = interpreter.RunString("testobj.Var = 10");

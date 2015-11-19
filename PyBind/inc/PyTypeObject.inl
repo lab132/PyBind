@@ -73,9 +73,25 @@ namespace pyb
     m_GetSetDefs[m_MethodDefs.size() - 1] = PyGetSetDef{const_cast<char*>(deleg.Name), deleg.Getter, deleg.Setter, const_cast<char*>(deleg.Name), nullptr};
     m_GetSetDefs.push_back({nullptr, nullptr, 0, nullptr, nullptr});
 
-    m_Binding.tp_getset = m_GetSetDefs.data();
+    // Are we already registered and did our vector move due to resizing?
+    // Then we need to redefine all already defined properties
+    if (m_Binding.tp_getset != m_GetSetDefs.data() && m_RegisteredModule)
+    {
+      //Excluding new delegate and sentinel
+      for(size_t i = 0; i < m_GetSetDefs.size() - 2; i++)
+      {
+        auto& newGetSetDef = m_GetSetDefs[i];
+        RegisterGetSetDefWithType(newGetSetDef);
 
-    //TODO: Redef property if already finalized or block it at all if not possible
+      }
+    }
+
+    if (m_RegisteredModule)
+    {
+      RegisterGetSetDefWithType(m_GetSetDefs[m_GetSetDefs.size() - 2]);
+    }
+
+    m_Binding.tp_getset = m_GetSetDefs.data();
   }
 
   template<typename T>
@@ -131,4 +147,13 @@ namespace pyb
     Py_INCREF(&m_Binding);
     m_RegisteredModule = &module;
   }
+
+  inline
+  void BaseTypeObject::RegisterGetSetDefWithType(PyGetSetDef& newGetSetDef)
+  {
+    Dictionary tpDict = Object::FromBorrowed(m_Binding.tp_dict).ToDictionary();
+    auto newGetSet = Object::FromNewRef(PyDescr_NewGetSet(&m_Binding, &newGetSetDef));
+    tpDict.SetItem(newGetSetDef.name, newGetSet);
+  }
 }
+
