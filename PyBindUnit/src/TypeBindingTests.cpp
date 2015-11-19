@@ -16,6 +16,26 @@ private:
   int m_Var;
 };
 
+class TestMemberType
+{
+public:
+
+  TestMemberType()
+  {
+  }
+
+  int GetVar() const
+  {
+    return m_Var;
+  }
+  void SetVar(int val)
+  {
+    m_Var = val;
+  }
+private:
+  int m_Var = 100;
+};
+
 SCENARIO("Type Binding", "[binding][type]")
 {
   Interpreter interpreter;
@@ -32,7 +52,7 @@ SCENARIO("Type Binding", "[binding][type]")
 
     REQUIRE(importResult.IsValid());
 
-    WHEN("Binding a new module")
+    WHEN("Binding a new type")
     {
       TypeObject<TestType> obj("TestType");
 
@@ -42,6 +62,7 @@ SCENARIO("Type Binding", "[binding][type]")
       {
         auto typeImportResult = interpreter.RunString("from testModule import TestType as myType");
         REQUIRE(typeImportResult.IsValid());
+        REQUIRE(typeImportResult.IsNone());
 
         AND_WHEN("Creating an instance of it")
         {
@@ -56,8 +77,49 @@ SCENARIO("Type Binding", "[binding][type]")
         }
       }
     }
+  }
+}
 
+SCENARIO("Type Member Binding", "[binding][type][member]")
+{
+  Interpreter interpreter;
+  interpreter.Initialize();
+  {
+    Module mod("testModule");
 
+    interpreter.RegisterModule(&mod);
+
+    Object result;
+
+    result = interpreter.RunString("import testModule");
+    REQUIRE(result.IsValid());
+
+    GIVEN("A bound type instance")
+    {
+      TypeObject<TestMemberType> obj("TestMemberType");
+      obj.SetDefaultConstructor();
+      obj.AddProperty(PY_BIND_PROPERTY(TestMemberType, Var));
+      mod.AddType(&obj);
+
+      result = interpreter.RunString("testobj = testModule.TestMemberType()");
+      REQUIRE(result.IsValid());
+      Object testobj = Dictionary::FromObject(interpreter.GetMainDict()).GetItem("testobj");
+      auto* testobjPtr = testobj.ToValue<TestMemberType*>();
+
+      REQUIRE(testobjPtr->GetVar() == 100);
+
+      WHEN("Binding a property to the object")
+      {
+        THEN("The property should be settable")
+        {
+          result = interpreter.RunString("testobj.Var = 10");
+          REQUIRE(result.IsValid());
+          REQUIRE(result.IsNone());
+          REQUIRE(testobjPtr->GetVar() == 10);
+        }
+      }
+
+    }
 
   }
 }

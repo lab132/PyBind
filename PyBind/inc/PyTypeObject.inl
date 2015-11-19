@@ -53,7 +53,7 @@ namespace pyb
       free(typedObj->ptr);
       typedObj->ptr = nullptr;
 
-      obj->ob_type->tp_free(obj);
+      Py_TYPE(obj)->tp_free(obj);
     };
   }
 
@@ -74,6 +74,8 @@ namespace pyb
     m_GetSetDefs.push_back({nullptr, nullptr, 0, nullptr, nullptr});
 
     m_Binding.tp_getset = m_GetSetDefs.data();
+
+    //TODO: Redef property if already finalized or block it at all if not possible
   }
 
   template<typename T>
