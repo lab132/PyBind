@@ -64,6 +64,25 @@ namespace pyb
     m_MethodDefs[m_MethodDefs.size() - 1] = {deleg.Name, deleg.Function, METH_VARARGS | METH_KEYWORDS, deleg.Name};
     m_MethodDefs.push_back({nullptr, nullptr, 0, nullptr});
 
+    // Are we already registered and did our vector move due to resizing?
+    // Then we need to redefine all already defined properties
+    if(m_Binding.tp_methods != m_MethodDefs.data() && m_RegisteredModule)
+    {
+      auto typeDict = Object::FromBorrowed(m_Binding.tp_dict).ToDictionary();
+
+      //Excluding new delegate and sentinel
+      for(size_t i = 0; i < m_MethodDefs.size() - 2; i++)
+      {
+        PyMethodDef& newMethodDef = m_MethodDefs[i];
+        RegisterFunctionWithType(newMethodDef);
+      }
+    }
+
+    if(m_RegisteredModule)
+    {
+      RegisterFunctionWithType(m_MethodDefs[m_MethodDefs.size() - 2]);
+    }
+
     m_Binding.tp_methods = m_MethodDefs.data();
   }
 
@@ -154,6 +173,43 @@ namespace pyb
     Dictionary tpDict = Object::FromBorrowed(m_Binding.tp_dict).ToDictionary();
     auto newGetSet = Object::FromNewRef(PyDescr_NewGetSet(&m_Binding, &newGetSetDef));
     tpDict.SetItem(newGetSetDef.name, newGetSet);
+  }
+  inline void BaseTypeObject::RegisterFunctionWithType(PyMethodDef & methodDef)
+  {
+
+    Object descr;
+    Dictionary typeDict = Object::FromBorrowed(m_Binding.tp_dict).ToDictionary();
+    if(typeDict.ContainsKey(methodDef.ml_name) &&
+      !(methodDef.ml_flags & METH_COEXIST))
+    {
+      return;
+    }
+    if(methodDef.ml_flags & METH_CLASS)
+    {
+      if(methodDef.ml_flags & METH_STATIC)
+      {
+        PyErr_SetString(PyExc_ValueError,
+          "method cannot be both class and static");
+        return;
+      }
+      descr = Object::FromNewRef(PyDescr_NewClassMethod(&m_Binding, &methodDef));
+    }
+    else if(methodDef.ml_flags & METH_STATIC)
+    {
+      Object cfunc = Object::FromNewRef(PyCFunction_NewEx(&methodDef, reinterpret_cast<PyObject*>(&m_Binding), nullptr));
+      if(!cfunc.IsValid())
+        return;
+      descr = Object::FromNewRef(PyStaticMethod_New(cfunc.ObjectPtr()));
+    }
+    else
+    {
+      descr = Object::FromNewRef(PyDescr_NewMethod(&m_Binding, &methodDef));
+    }
+    if(!descr.IsValid())
+    {
+      return;
+    }
+    typeDict.SetItem(methodDef.ml_name, descr);
   }
 }
 
