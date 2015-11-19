@@ -69,6 +69,11 @@ namespace pyb
     return PyObject_IsInstance(m_PyObject, reinterpret_cast<PyObject*> (&type->m_Binding)) == 1;
   }
 
+  inline Dictionary Object::ToDictionary()
+  {
+    return Dictionary::FromObject(*this);
+  }
+
   inline
     Object Object::FromBorrowed(PyObject * pyObject)
   {

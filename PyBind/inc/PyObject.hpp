@@ -5,6 +5,7 @@
 namespace pyb
 {
   class BaseTypeObject;
+  class Dictionary;
 
   class Object
   {
@@ -37,6 +38,8 @@ namespace pyb
 
     template<typename T>
     T ToValue();
+
+    Dictionary ToDictionary();
 
     template<typename ...ArgT>
     Object Call(ArgT... args);
