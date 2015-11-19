@@ -80,7 +80,7 @@ SCENARIO("Type Binding", "[binding][type]")
   }
 }
 
-SCENARIO("Type Member Binding", "[binding][type][member]")
+SCENARIO("Type Property Binding", "[binding][type][property]")
 {
   Interpreter interpreter;
   interpreter.Initialize();
@@ -113,6 +113,50 @@ SCENARIO("Type Member Binding", "[binding][type][member]")
         THEN("The property should be settable")
         {
           result = interpreter.RunString("testobj.Var = 10");
+          REQUIRE(result.IsValid());
+          REQUIRE(result.IsNone());
+          REQUIRE(testobjPtr->GetVar() == 10);
+        }
+      }
+
+    }
+
+  }
+}
+
+SCENARIO("Type Function Binding", "[binding][type][function]")
+{
+  Interpreter interpreter;
+  interpreter.Initialize();
+  {
+    Module mod("testModule");
+
+    interpreter.RegisterModule(&mod);
+
+    Object result;
+
+    result = interpreter.RunString("import testModule");
+    REQUIRE(result.IsValid());
+
+    GIVEN("A bound type instance")
+    {
+      TypeObject<TestMemberType> obj("TestMemberType");
+      obj.SetDefaultConstructor();
+      mod.AddType(&obj);
+
+      result = interpreter.RunString("testobj = testModule.TestMemberType()");
+      REQUIRE(result.IsValid());
+      Object testobj = Dictionary::FromObject(interpreter.GetMainDict()).GetItem("testobj");
+      auto* testobjPtr = testobj.ToValue<TestMemberType*>();
+
+      REQUIRE(testobjPtr->GetVar() == 100);
+
+      WHEN("Binding a function to the object")
+      {
+        obj.AddMethod(PY_BIND_METHOD(TestMemberType, SetVar));
+        THEN("The function should be callable")
+        {
+          result = interpreter.RunString("testobj.SetVar(10)");
           REQUIRE(result.IsValid());
           REQUIRE(result.IsNone());
           REQUIRE(testobjPtr->GetVar() == 10);
