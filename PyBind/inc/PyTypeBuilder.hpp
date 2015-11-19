@@ -245,6 +245,24 @@ namespace pyb
       }
       return true;
     }
+
+    template<size_t ...S>
+    static
+      inline
+      bool ParseValue(const std::string& argumentString, PyObject* object, std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >& arguments, seq<S...>)
+    {
+      int result = PyArg_Parse(object, argumentString.c_str(), &std::get<S>(arguments)...);
+
+      if(result == 0)
+      {
+        static std::string errorString = "Could not parse arguments, expected: " + BuildVerboseFunctionArgumentString<ArgT...>();
+        PyErr_SetString(PyExc_TypeError, errorString.c_str());
+        //PyErr_Clear();
+        return false;
+      }
+      return true;
+    }
+
   };
 
   // Call helper for constructors
