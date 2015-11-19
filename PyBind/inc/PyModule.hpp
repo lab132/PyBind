@@ -15,6 +15,7 @@ namespace pyb
   public:
 
     Module( const std::string& name, const std::string& documentation = "" );
+    ~Module();
 
     const std::string& Name() const;
     const void SetName(const std::string& name);
@@ -22,6 +23,7 @@ namespace pyb
     bool IsRegistered() const;
     void AddFunction( const BindDelegate& bindDelegate);
     void AddType(BaseTypeObject* typeObject);
+    void RemoveType(BaseTypeObject* typeObject);
     const Object& GetObject() const;
 
     friend class Interpreter;

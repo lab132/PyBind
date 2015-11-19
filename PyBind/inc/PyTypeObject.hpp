@@ -20,6 +20,7 @@ namespace pyb
     void RegisterAtModule(Module& module);
 
     PyTypeObject m_Binding;
+    Module* m_RegisteredModule = nullptr;
   };
 
   template <typename T>

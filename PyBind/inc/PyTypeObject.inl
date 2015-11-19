@@ -102,7 +102,24 @@ namespace pyb
 
   inline BaseTypeObject::~BaseTypeObject()
   {
-    //Py_DECREF(&m_Binding);
+    if (m_RegisteredModule)
+    {
+      // AFAIK this will remove any reference to this type from the python interpreter,
+      // which is probably what we want, since we want to remove the type completely
+      // out of python (since after this dtor the reference to this object will be invalid memory)
+      // However there is no documentation at all on how to remove a type object from python
+      // (probably there is no way, since the tutorials expect you too create this as a global variable)
+
+      // Remove from module dictionary
+      m_RegisteredModule->RemoveType(this);
+
+      // Remove from internal type dictionary
+      Object::FromBorrowed(m_Binding.tp_dict).ToDictionary().Clear();
+
+      // Remove from heap tracking
+      _Py_ForgetReference(reinterpret_cast<PyObject*>(&m_Binding));
+      m_RegisteredModule = nullptr;
+    }
   }
 
   inline
@@ -110,5 +127,6 @@ namespace pyb
   {
     PyType_Ready(&m_Binding);
     Py_INCREF(&m_Binding);
+    m_RegisteredModule = &module;
   }
 }

@@ -33,6 +33,7 @@ namespace pyb
     if(!m_Finalized)
     {
       m_GlobalsDict.Invalidate();
+      m_Modules.clear();
       Py_Finalize();
       m_Finalized = true;
     }

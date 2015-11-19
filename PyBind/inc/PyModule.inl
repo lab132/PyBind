@@ -1,3 +1,4 @@
+#include "PyModule.hpp"
 #pragma once
 
 namespace pyb
@@ -11,6 +12,18 @@ namespace pyb
     m_RegisteredTypes()
   {
     m_MethodDefinitions.push_back({nullptr,nullptr,0,nullptr});
+  }
+
+  inline Module::~Module()
+  {
+    if (m_Registered)
+    {
+
+      Object moduleDict = Object::FromBorrowed(PyImport_GetModuleDict());
+
+      PyDict_SetItemString(moduleDict.ObjectPtr(), m_Name.c_str(), Py_None);
+      m_Registered = false;
+    }
   }
 
   inline
@@ -95,8 +108,22 @@ namespace pyb
     typeObject->RegisterAtModule(*this);
 
     m_RegisteredTypes.push_back(typeObject);
-
     PyModule_AddObject(m_Module.ObjectPtr(), typeObject->m_Binding.tp_name, reinterpret_cast<PyObject*> (&typeObject->m_Binding));
 
+  }
+  inline void Module::RemoveType(BaseTypeObject * typeObject)
+  {
+    auto result = std::find(m_RegisteredTypes.begin(), m_RegisteredTypes.end(), typeObject);
+    PYB_ASSERT(result != m_RegisteredTypes.end());
+
+    m_RegisteredTypes.erase(result);
+
+    Dictionary::FromObject(
+      Object::FromBorrowed(
+        PyModule_GetDict(
+          m_Module.ObjectPtr()))).
+      SetItem(
+        typeObject->m_Binding.tp_name,
+        Object::FromBorrowed(Py_None));
   }
 }
