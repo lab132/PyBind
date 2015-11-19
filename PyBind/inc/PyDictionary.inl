@@ -1,3 +1,4 @@
+#include "PyDictionary.hpp"
 #pragma once
 
 
@@ -10,7 +11,7 @@ namespace pyb
   }
 
   inline
-    Dictionary pyb::Dictionary::FromObject(const Object & obj)
+  Dictionary pyb::Dictionary::FromObject(const Object & obj)
   {
     PYB_ASSERT(obj.IsValid() && obj.IsDictionary());
 
@@ -18,13 +19,14 @@ namespace pyb
   }
 
   inline
-    bool Dictionary::ContainsKey(const Object & obj) const
+  bool Dictionary::ContainsKey(const Object& obj) const
   {
+    PYB_ASSERT(obj.IsValid());
     return PyDict_Contains(m_Dictionary.ObjectPtr(), obj.ObjectPtr()) != 0;
   }
 
   inline
-    bool Dictionary::ContainsKey(const std::string & string) const
+  bool Dictionary::ContainsKey(const std::string& string) const
   {
     Object obj = Object::FromNewRef(Py_BuildValue("s", string.c_str()));
 
@@ -32,8 +34,22 @@ namespace pyb
   }
 
   inline
-    Object Dictionary::GetItem(const Object & key) const
+  bool Dictionary::DeleteItem(const Object& key) const
   {
+    PYB_ASSERT(key.IsValid());
+    return PyDict_DelItem(m_Dictionary.ObjectPtr(), key.ObjectPtr()) == 0;
+  }
+
+  inline
+  bool Dictionary::DeleteItem(const std::string& key) const
+  {
+    return PyDict_DelItemString(m_Dictionary.ObjectPtr(), key.c_str()) == 0;
+  }
+
+  inline
+  Object Dictionary::GetItem(const Object & key) const
+  {
+    PYB_ASSERT(key.IsValid());
     return Object::FromBorrowed(PyDict_GetItem(m_Dictionary.ObjectPtr(), key.ObjectPtr()));
   }
 
@@ -44,12 +60,15 @@ namespace pyb
 
   inline bool Dictionary::SetObject(const Object & key, const Object & value) const
   {
+    PYB_ASSERT(key.IsValid());
+    PYB_ASSERT(value.IsValid());
     int result = PyDict_SetItem(m_Dictionary.ObjectPtr(), key.ObjectPtr(), value.ObjectPtr());
     return result == 0;
   }
 
   inline bool Dictionary::SetObject(const std::string & key, const Object & value) const
   {
+    PYB_ASSERT(value.IsValid());
     int result = PyDict_SetItemString(m_Dictionary.ObjectPtr(), key.c_str(), value.ObjectPtr());
     return result == 0;
   }

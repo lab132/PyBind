@@ -15,6 +15,9 @@ namespace pyb
     bool ContainsKey(const Object& obj) const;
     bool ContainsKey(const std::string& string) const;
 
+    bool DeleteItem(const Object& key) const;
+    bool DeleteItem(const std::string& key) const;
+
     Object GetItem(const Object& key) const;
     Object GetItem(const std::string& key) const;
 
