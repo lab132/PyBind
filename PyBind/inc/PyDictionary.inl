@@ -84,6 +84,11 @@ namespace pyb
     PyDict_Clear(m_Dictionary.ObjectPtr());
   }
 
+  inline size_t Dictionary::Size() const
+  {
+    return PyDict_Size(m_Dictionary.ObjectPtr());
+  }
+
   template<typename T>
   inline
     T Dictionary::GetItem(const std::string & key)
@@ -93,8 +98,21 @@ namespace pyb
   }
 
   template<typename T>
+  inline T Dictionary::GetItem(const Object & key)
+  {
+    Object obj = GetItem(key);
+    return obj.ToValue<T>();
+  }
+
+  template<typename T>
   inline
     bool Dictionary::SetItem(const std::string & key, T value)
+  {
+    Object val = BuildValue<T>(value);
+    return SetObject(key, val);
+  }
+  template<typename T>
+  inline bool Dictionary::SetItem(const Object & key, T value)
   {
     Object val = BuildValue<T>(value);
     return SetObject(key, val);

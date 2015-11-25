@@ -27,13 +27,18 @@ namespace pyb
 
     template<typename T>
     bool SetItem(const std::string& key, T value);
+    template<typename T>
+    bool SetItem(const Object& key, T value);
 
     template<typename T>
-    T GetItem(const std::string & key);
+    T GetItem(const std::string& key);
+    template<typename T>
+    T GetItem(const Object& key);
 
     void Clear();
 
-  private:
+    size_t Size() const;
+
     Object m_Dictionary;
   };
 }
