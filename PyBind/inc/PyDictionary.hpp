@@ -11,6 +11,7 @@ namespace pyb
     Dictionary(const Object& obj);
 
     static Dictionary FromObject(const Object& obj);
+    static Dictionary Create();
 
     bool ContainsKey(const Object& obj) const;
     bool ContainsKey(const std::string& string) const;

@@ -18,6 +18,11 @@ namespace pyb
     return Dictionary(obj);
   }
 
+  inline Dictionary Dictionary::Create()
+  {
+    return Object::FromNewRef(PyDict_New());
+  }
+
   inline
   bool Dictionary::ContainsKey(const Object& obj) const
   {
