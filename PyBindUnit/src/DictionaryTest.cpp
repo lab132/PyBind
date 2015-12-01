@@ -191,3 +191,44 @@ SCENARIO("Dictionary wrapping", "[binding][dictionary]")
     }
   }
 }
+
+SCENARIO("Dictionary array operator", "[binding][dictionary][operator]")
+{
+  GIVEN("An empty dictionary")
+  {
+    Interpreter interpreter;
+    interpreter.Initialize();
+    Dictionary dict = Dictionary::Create();
+    REQUIRE(dict.m_Dictionary.IsValid());
+    REQUIRE(!dict.m_Dictionary.IsNone());
+    REQUIRE(dict.m_Dictionary.IsDictionary());
+    REQUIRE(dict.Size() == 0);
+
+    WHEN("Inserting a string key/value")
+    {
+      REQUIRE(!dict.ContainsKey("testKey"));
+      dict["testKey"] = 5;
+      REQUIRE(dict.Size() == 1);
+      THEN("It should be saved in the dictionary")
+      {
+        REQUIRE(dict.ContainsKey("testKey"));
+        REQUIRE(dict.GetItem<int>("testKey") == 5);
+        int result = dict["myKey"];
+        REQUIRE(result == 5);
+
+        AND_WHEN("Deleting the item")
+        {
+          REQUIRE(dict.DeleteItem("testKey"));
+
+          THEN("It should be removed")
+          {
+            REQUIRE(dict.Size() == 0);
+
+            REQUIRE(!dict.ContainsKey("testKey"));
+          }
+        }
+      }
+
+    }
+  }
+}
