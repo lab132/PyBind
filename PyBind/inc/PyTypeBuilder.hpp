@@ -97,21 +97,6 @@ namespace pyb
     return ArgumentStringHelper<ArgT...>::BuildVerboseString();
   }
 
-  template<typename ... ArgT>
-  Object BuildValue(ArgT... arguments)
-  {
-    static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
-
-    return Object::FromNewRef(Py_BuildValue(argumentString.c_str(), arguments...));
-  }
-
-  template<typename ... ArgT>
-  Object BuildValueTuple(ArgT... arguments)
-  {
-    static std::string argumentString = "(" + BuildFunctionArgumentString<ArgT...>() + ")";
-
-    return Object::FromNewRef(Py_BuildValue(argumentString.c_str(), arguments...));
-  }
 
   template<typename T>
   struct ArgumentTypeHelper
@@ -126,6 +111,15 @@ namespace pyb
     {
       return t;
     }
+
+    static
+    inline
+    Type ConvertFrom(WrappedType t)
+    {
+      return t;
+    }
+
+
   };
 
   template<>
@@ -139,6 +133,13 @@ namespace pyb
       WrappedType Convert(Type t)
     {
       return Object::FromBorrowed(t);
+    }
+
+    static
+      inline
+    Type ConvertFrom(WrappedType t)
+    {
+      return t.ObjectPtr();
     }
   };
 
@@ -154,6 +155,13 @@ namespace pyb
     {
       return std::string(t);
     }
+
+    static
+      inline
+    Type ConvertFrom(WrappedType t)
+    {
+      return t.c_str();
+    }
   };
 
   template<>
@@ -165,6 +173,14 @@ namespace pyb
     static
       inline
       WrappedType Convert(Type t)
+    {
+      return t;
+    }
+
+
+    static
+      inline
+      Type ConvertFrom(WrappedType t)
     {
       return t;
     }
@@ -182,12 +198,27 @@ namespace pyb
     {
       return reinterpret_cast<WrappedType>(t->ptr);
     }
+
+
+    static
+      inline
+      Type ConvertFrom(WrappedType t)
+    {
+      static_assert(false, "Not supported");
+      return nullptr;
+    }
   };
 
   template<typename A, typename B>
   void Set(A& from, B& to)
   {
     to = ArgumentTypeHelper<B>::Convert(from);
+  }
+
+  template<typename A, typename B>
+  void SetFrom(A& from, B& to)
+  {
+    to = ArgumentTypeHelper<A>::ConvertFrom(from);
   }
 
   template<int ...>
@@ -206,6 +237,10 @@ namespace pyb
     typedef seq<S...> type;
   };
 
+  template<typename T>
+  typename ArgumentTypeHelper<T>::Type TypeArgumentDeducer();
+
+
   template<typename ...Arg1>
   struct TupleConvertHelper
   {
@@ -220,6 +255,16 @@ namespace pyb
         using expander = int [];
         expander{0,
           (void(Set(std::get<S>(from),std::get<S>(to))), 0)...
+        };
+      }
+      template<size_t ...S>
+      inline
+        static
+        void ConvertFrom(std::tuple<Arg1...>& from, std::tuple<Arg2...>& to, seq<S...>)
+      {
+        using expander = int [];
+        expander{0,
+          (void(SetFrom(std::get<S>(from),std::get<S>(to))), 0)...
         };
       }
     };
@@ -263,7 +308,43 @@ namespace pyb
       return true;
     }
 
+    template<size_t ...S>
+    static
+      inline
+      Object BuildValue(std::tuple<ArgT...>& arguments, const std::string& argumentString, seq<S...>)
+    {
+      return Object::FromNewRef(Py_BuildValue(argumentString.c_str(), std::get<S>(arguments)...));
+    }
+
   };
+
+  template<typename ... ArgT>
+  Object BuildValue(ArgT... arguments)
+  {
+    static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
+    std::tuple<decltype(TypeArgumentDeducer<ArgT>())...> intermediate;
+    std::tuple<ArgT...> original = std::tuple<ArgT...>(arguments...);
+    TupleConvertHelper<ArgT...>::TupleHelper<decltype(TypeArgumentDeducer<ArgT>())...>::ConvertFrom(
+      original, intermediate, gens<sizeof...(ArgT)>::type());
+
+    Object result = ArgumentHelper<decltype(TypeArgumentDeducer<ArgT>())...>::
+      BuildValue(intermediate, argumentString, gens<sizeof...(ArgT)>::type());
+    return result;
+  }
+
+  template<typename ... ArgT>
+  Object BuildValueTuple(ArgT... arguments)
+  {
+    static std::string argumentString = "(" + BuildFunctionArgumentString<ArgT...>() + ")";
+    return Object();
+    //std::tuple<decltype(TypeArgumentDeducer<ArgT>())...> intermediate;
+    //std::tuple<ArgT...> original = std::tuple<ArgT...>(arguments...);
+    //TupleConvertHelper<ArgT...>::TupleHelper<decltype(TypeArgumentDeducer<ArgT>())...>::ConvertFrom(original, intermediate, gens<sizeof...(ArgT)>::type());
+    //
+    //return ArgumentHelper<decltype(TypeArgumentDeducer<ArgT>())...>::
+    //  BuildValue(argumentString, intermediate, gens<sizeof...(ArgT)>::type());
+  }
+
 
   // Call helper for constructors
   template<typename T, typename ...ArgT>
