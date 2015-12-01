@@ -5,6 +5,31 @@
 namespace pyb
 {
   inline
+  pyb::DictionaryEntryRef::DictionaryEntryRef(const Object & key, const Dictionary& dict) :
+    m_Key(key),
+    m_Dict(dict)
+  {
+  }
+
+  template<typename T>
+  inline void pyb::DictionaryEntryRef::operator=(const T & obj)
+  {
+    m_Dict.SetItem<T>(m_Key, obj);
+  }
+
+  template<typename T>
+  inline T DictionaryEntryRef::GetValue() const
+  {
+    return m_Dict.GetItem<T>(m_Key);
+  }
+
+  template<typename T>
+  inline DictionaryEntryRef::operator T() const
+  {
+    return m_Dict.GetItem<T>(m_Key);
+  }
+
+  inline
     Dictionary::Dictionary(const Object & obj) :
     m_Dictionary(obj)
   {
@@ -91,17 +116,22 @@ namespace pyb
 
   template<typename T>
   inline
-    T Dictionary::GetItem(const std::string & key)
+    T Dictionary::GetItem(const std::string & key) const
   {
     Object obj = GetItem(key);
     return obj.ToValue<T>();
   }
 
   template<typename T>
-  inline T Dictionary::GetItem(const Object & key)
+  inline T Dictionary::GetItem(const Object & key) const
   {
     Object obj = GetItem(key);
     return obj.ToValue<T>();
+  }
+
+  inline DictionaryEntryRef Dictionary::operator[](const std::string & key)
+  {
+    return DictionaryEntryRef(BuildValue(key), *this);
   }
 
   template<typename T>
