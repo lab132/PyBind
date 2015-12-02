@@ -213,7 +213,7 @@ SCENARIO("Dictionary array operator", "[binding][dictionary][operator]")
       {
         REQUIRE(dict.ContainsKey("testKey"));
         REQUIRE(dict.GetItem<int>("testKey") == 5);
-        int result = dict["myKey"];
+        int result = dict["testKey"];
         REQUIRE(result == 5);
 
         AND_WHEN("Deleting the item")
