@@ -103,6 +103,7 @@ namespace pyb
   template<typename T>
   inline T Object::ToValue()
   {
+    PYB_ASSERT(IsValid());
     static std::string argumentString = BuildFunctionArgumentString<T>().c_str();
     std::tuple<ArgumentTypeHelper<T>::Type> tempValue;
     ArgumentHelper<ArgumentTypeHelper<T>::Type>::ParseValue(argumentString, m_PyObject, tempValue, gens<1>::type());
