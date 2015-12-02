@@ -89,7 +89,13 @@ namespace pyb
   template<typename T>
   inline void TypeObject<T>::AddProperty(const BindGetSetDelegate & deleg)
   {
-    m_GetSetDefs[m_MethodDefs.size() - 1] = PyGetSetDef{const_cast<char*>(deleg.Name), deleg.Getter, deleg.Setter, const_cast<char*>(deleg.Name), nullptr};
+    m_GetSetDefs[m_MethodDefs.size() - 1] = PyGetSetDef{
+      const_cast<char*>(deleg.Name),
+      deleg.Getter,
+      deleg.Setter,
+      const_cast<char*>(deleg.Name),
+      nullptr
+    };
     m_GetSetDefs.push_back({nullptr, nullptr, 0, nullptr, nullptr});
 
     // Are we already registered and did our vector move due to resizing?
@@ -196,7 +202,8 @@ namespace pyb
     }
     else if(methodDef.ml_flags & METH_STATIC)
     {
-      Object cfunc = Object::FromNewRef(PyCFunction_NewEx(&methodDef, reinterpret_cast<PyObject*>(&m_Binding), nullptr));
+      Object cfunc = Object::FromNewRef(
+        PyCFunction_NewEx(&methodDef, reinterpret_cast<PyObject*>(&m_Binding), nullptr));
       if(!cfunc.IsValid())
         return;
       descr = Object::FromNewRef(PyStaticMethod_New(cfunc.ObjectPtr()));
@@ -212,4 +219,3 @@ namespace pyb
     typeDict.SetItem(methodDef.ml_name, descr);
   }
 }
-

@@ -108,7 +108,10 @@ namespace pyb
     typeObject->RegisterAtModule(*this);
 
     m_RegisteredTypes.push_back(typeObject);
-    PyModule_AddObject(m_Module.ObjectPtr(), typeObject->m_Binding.tp_name, reinterpret_cast<PyObject*> (&typeObject->m_Binding));
+    PyModule_AddObject(
+      m_Module.ObjectPtr(),
+      typeObject->m_Binding.tp_name,
+      reinterpret_cast<PyObject*> (&typeObject->m_Binding));
 
   }
   inline void Module::RemoveType(BaseTypeObject * typeObject)

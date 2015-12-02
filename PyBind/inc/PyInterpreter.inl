@@ -108,7 +108,8 @@ namespace pyb
       locals = &GetMainDict();
     }
 
-    return Object::FromNewRef(PyRun_FileEx(file, fileName.c_str(), Py_file_input, globals->ObjectPtr(), locals->ObjectPtr(), 1));
+    return Object::FromNewRef(
+      PyRun_FileEx(file, fileName.c_str(), Py_file_input, globals->ObjectPtr(), locals->ObjectPtr(), 1));
   }
 
   inline

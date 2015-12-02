@@ -42,7 +42,7 @@ namespace pyb
       inline
       std::string BuildVerboseString()
     {
-      return std::string( PyTypeTrait<T>::PyVerboseString ) + ", " + ArgumentStringHelper<ArgT...>::BuildVerboseString();
+      return std::string(PyTypeTrait<T>::PyVerboseString) + ", " + ArgumentStringHelper<ArgT...>::BuildVerboseString();
     }
 
   };
@@ -278,13 +278,18 @@ namespace pyb
     template<size_t ...S>
     static
       inline
-      bool ParseArguments(const std::string& argumentString, PyObject* object, std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >& arguments, seq<S...>)
+      bool ParseArguments(
+        const std::string& argumentString,
+        PyObject* object,
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >& arguments,
+        seq<S...>)
     {
       int result = PyArg_ParseTuple(object, argumentString.c_str(), &std::get<S>(arguments)...);
 
       if(result == 0)
       {
-        static std::string errorString = "Could not parse arguments, expected: " + BuildVerboseFunctionArgumentString<ArgT...>();
+        static std::string errorString =
+          "Could not parse arguments, expected: " + BuildVerboseFunctionArgumentString<ArgT...>();
         PyErr_SetString(PyExc_TypeError , errorString.c_str());
         //PyErr_Clear();
         return false;
@@ -295,13 +300,18 @@ namespace pyb
     template<size_t ...S>
     static
       inline
-      bool ParseValue(const std::string& argumentString, PyObject* object, std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >& arguments, seq<S...>)
+      bool ParseValue(
+        const std::string& argumentString,
+        PyObject* object,
+        std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >& arguments,
+        seq<S...>)
     {
       int result = PyArg_Parse(object, argumentString.c_str(), &std::get<S>(arguments)...);
 
       if(result == 0)
       {
-        static std::string errorString = "Could not parse arguments, expected: " + BuildVerboseFunctionArgumentString<ArgT...>();
+        static std::string errorString =
+          "Could not parse arguments, expected: " + BuildVerboseFunctionArgumentString<ArgT...>();
         PyErr_SetString(PyExc_TypeError, errorString.c_str());
         //PyErr_Clear();
         return false;
@@ -461,7 +471,7 @@ namespace pyb
         std::tuple<decltype(ArgumentTypeHelper<ArgT>::Type()) ...> arguments;
         std::tuple<ArgT...> finalArguments;
 
-        if( ArgumentHelper<ArgT...>::ParseArguments( argumentString, args, arguments, gens<sizeof...( ArgT )>::type() ) )
+        if( ArgumentHelper<ArgT...>::ParseArguments(argumentString, args, arguments, gens<sizeof...(ArgT)>::type()))
         {
           TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
@@ -537,7 +547,11 @@ namespace pyb
           TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
           RT result;
-          result = CallHelper<RT(T::*)(ArgT...)>::CallTypeHelper<F>::Call(reinterpret_cast<T*>(typedSelf->ptr), finalArguments, gens<sizeof...(ArgT)>::type());
+          result = CallHelper<RT(T::*)(ArgT...)>::
+                    CallTypeHelper<F>::Call(
+                      reinterpret_cast<T*>(typedSelf->ptr),
+                      finalArguments,
+                      gens<sizeof...(ArgT)>::type());
 
           PyObject* obj = Py_BuildValue(PyTypeTrait<RT>::PyTypeString, result);
           return obj;
@@ -681,7 +695,8 @@ namespace pyb
 
         return 0;
 
-        static std::string errorString = std::string("Expected value to be type of ") + PyTypeTrait<ArgT>::PyVerboseString;
+        static std::string errorString =
+          std::string("Expected value to be type of ") + PyTypeTrait<ArgT>::PyVerboseString;
         PyErr_SetString(PyExc_TypeError, errorString.c_str());
         return -1;
 
@@ -728,7 +743,8 @@ namespace pyb
 
         return 0;
 
-        static std::string errorString = std::string("Expected value to be type of ") + PyTypeTrait<ArgT>::PyVerboseString;
+        static std::string errorString =
+          std::string("Expected value to be type of ") + PyTypeTrait<ArgT>::PyVerboseString;
         PyErr_SetString(PyExc_TypeError, errorString.c_str());
         return -1;
 
@@ -776,7 +792,8 @@ namespace pyb
           TupleConvertHelper<decltype(ArgumentTypeHelper<ArgT>::Type()) ... >::TupleHelper<ArgT...>::ConvertTo(
             arguments, finalArguments, gens<sizeof...(ArgT)>::type());
 
-          CtorCallHelper<T, ArgT...>::Call(static_cast<T*>( newObj->ptr ), finalArguments, gens<sizeof...(ArgT)>::type());
+          CtorCallHelper<T, ArgT...>::
+            Call(static_cast<T*>( newObj->ptr ), finalArguments, gens<sizeof...(ArgT)>::type());
           return 0;
         }
         else
