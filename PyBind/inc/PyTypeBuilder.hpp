@@ -158,7 +158,7 @@ namespace pyb
 
     static
       inline
-    Type ConvertFrom(WrappedType t)
+    Type ConvertFrom(const WrappedType& t)
     {
       return t.c_str();
     }
@@ -180,7 +180,7 @@ namespace pyb
 
     static
       inline
-      Type ConvertFrom(WrappedType t)
+      Type ConvertFrom(const WrappedType& t)
     {
       return t;
     }
@@ -238,7 +238,8 @@ namespace pyb
   };
 
   template<typename T>
-  typename ArgumentTypeHelper<T>::Type TypeArgumentDeducer();
+  inline
+  typename ArgumentTypeHelper<T>::Type TypeArgumentDeducer(){ }
 
 
   template<typename ...Arg1>
@@ -308,6 +309,23 @@ namespace pyb
       return true;
     }
 
+
+  };
+
+  // Due to a compiler crash, this function needs to be in a separate struct.
+  template<typename ...ArgT>
+  struct BuildHelper
+  {
+    //template<size_t _Index>
+    //static
+    //  inline
+    //typename std::tuple_element<_Index, std::tuple<ArgT...> >::type
+    //  UnMove(std::tuple<ArgT...>& arguments)
+    //{
+    //  return std::get<_Index>(arguments);
+    //}
+
+
     template<size_t ...S>
     static
       inline
@@ -315,20 +333,21 @@ namespace pyb
     {
       return Object::FromNewRef(Py_BuildValue(argumentString.c_str(), std::get<S>(arguments)...));
     }
-
   };
 
   template<typename ... ArgT>
   Object BuildValue(ArgT... arguments)
   {
+    using myGen = gens < sizeof...(ArgT)>::type;
+
     static std::string argumentString = BuildFunctionArgumentString<ArgT...>();
     std::tuple<decltype(TypeArgumentDeducer<ArgT>())...> intermediate;
     std::tuple<ArgT...> original = std::tuple<ArgT...>(arguments...);
     TupleConvertHelper<ArgT...>::TupleHelper<decltype(TypeArgumentDeducer<ArgT>())...>::ConvertFrom(
-      original, intermediate, gens<sizeof...(ArgT)>::type());
+      original, intermediate, myGen());
 
-    Object result = ArgumentHelper<decltype(TypeArgumentDeducer<ArgT>())...>::
-      BuildValue(intermediate, argumentString, gens<sizeof...(ArgT)>::type());
+    Object result = BuildHelper<decltype(TypeArgumentDeducer<ArgT>())...>::
+      BuildValue(intermediate, argumentString, myGen());
     return result;
   }
 
@@ -336,13 +355,17 @@ namespace pyb
   Object BuildValueTuple(ArgT... arguments)
   {
     static std::string argumentString = "(" + BuildFunctionArgumentString<ArgT...>() + ")";
-    return Object();
-    //std::tuple<decltype(TypeArgumentDeducer<ArgT>())...> intermediate;
-    //std::tuple<ArgT...> original = std::tuple<ArgT...>(arguments...);
-    //TupleConvertHelper<ArgT...>::TupleHelper<decltype(TypeArgumentDeducer<ArgT>())...>::ConvertFrom(original, intermediate, gens<sizeof...(ArgT)>::type());
-    //
-    //return ArgumentHelper<decltype(TypeArgumentDeducer<ArgT>())...>::
-    //  BuildValue(argumentString, intermediate, gens<sizeof...(ArgT)>::type());
+
+    using myGen = gens < sizeof...(ArgT)>::type;
+
+    std::tuple<decltype(TypeArgumentDeducer<ArgT>())...> intermediate;
+    std::tuple<ArgT...> original = std::tuple<ArgT...>(arguments...);
+    TupleConvertHelper<ArgT...>::TupleHelper<decltype(TypeArgumentDeducer<ArgT>())...>::ConvertFrom(
+      original, intermediate, myGen());
+
+    Object result = BuildHelper<decltype(TypeArgumentDeducer<ArgT>())...>::
+      BuildValue(intermediate, argumentString, myGen());
+    return result;
   }
 
 
