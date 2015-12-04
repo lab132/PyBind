@@ -47,6 +47,11 @@ namespace pyb
     return PyDict_Check(m_PyObject);
   }
 
+  inline bool Object::IsList() const
+  {
+    return PyList_Check(m_PyObject);
+  }
+
   inline
     bool Object::IsCallable() const
   {
@@ -72,6 +77,11 @@ namespace pyb
   inline Dictionary Object::ToDictionary()
   {
     return Dictionary::FromObject(*this);
+  }
+
+  inline List Object::ToList()
+  {
+    return List::FromObject(*this);
   }
 
   inline

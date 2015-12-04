@@ -6,6 +6,7 @@ namespace pyb
 {
   class BaseTypeObject;
   class Dictionary;
+  class List;
 
   class Object
   {
@@ -28,6 +29,8 @@ namespace pyb
 
     bool IsDictionary() const;
 
+    bool IsList() const;
+
     bool IsCallable() const;
 
     void Invalidate();
@@ -40,6 +43,7 @@ namespace pyb
     T ToValue();
 
     Dictionary ToDictionary();
+    List ToList();
 
     template<typename ...ArgT>
     Object Call(ArgT... args);
