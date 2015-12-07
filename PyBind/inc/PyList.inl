@@ -47,7 +47,8 @@ namespace pyb
   }
   inline List List::FromObject(const Object & obj)
   {
-    PYB_ASSERT(obj.IsValid() && obj.IsList());
+    PYB_ASSERT(obj.IsValid());
+    PYB_ASSERT(obj.IsList());
     return List(obj);
   }
 

@@ -38,7 +38,8 @@ namespace pyb
   inline
   Dictionary pyb::Dictionary::FromObject(const Object & obj)
   {
-    PYB_ASSERT(obj.IsValid() && obj.IsDictionary());
+    PYB_ASSERT(obj.IsValid());
+    PYB_ASSERT(obj.IsDictionary());
 
     return Dictionary(obj);
   }
