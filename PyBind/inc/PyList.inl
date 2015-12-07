@@ -14,16 +14,19 @@ namespace pyb
     m_PyObject(obj)
   {
   }
+
   inline bool List::IsValid() const
   {
     return m_PyObject.IsValid() && m_PyObject.IsList();
   }
+
   inline Object List::GetItemObject(size_t index) const
   {
     PYB_ASSERT(IsValid());
     PYB_ASSERT(index < Size());
     return Object::FromBorrowed(PyList_GetItem(m_PyObject.ObjectPtr(), index));
   }
+
   inline void List::SetItemObject(size_t index, Object& newValue)
   {
     PYB_ASSERT(IsValid());
@@ -45,11 +48,17 @@ namespace pyb
     PYB_ASSERT(m_PyObject.IsValid());
     return PyList_Size(m_PyObject.ObjectPtr());
   }
+
   inline List List::FromObject(const Object & obj)
   {
     PYB_ASSERT(obj.IsValid());
     PYB_ASSERT(obj.IsList());
     return List(obj);
+  }
+
+  inline List List::Create()
+  {
+    return Object::FromNewRef(PyList_New(0)).ToList();
   }
 
   template<typename T>
@@ -59,7 +68,6 @@ namespace pyb
     PYB_ASSERT(obj.IsValid());
     return obj.ToValue<T>();
   }
-
 
   inline
   pyb::ListEntryRef::ListEntryRef(size_t key, const List & list) :

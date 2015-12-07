@@ -27,6 +27,7 @@ namespace pyb
     Object m_PyObject;
 
     static List FromObject(const Object& obj);
+    static List Create();
   };
 
   /**
