@@ -74,6 +74,18 @@ namespace pyb
     return PyObject_IsInstance(m_PyObject, reinterpret_cast<PyObject*> (&type->m_Binding)) == 1;
   }
 
+  inline void Object::IncrementRefCount()
+  {
+    PYB_ASSERT(IsValid());
+    Py_INCREF(m_PyObject);
+  }
+
+  inline void Object::DecrementRefCount()
+  {
+    PYB_ASSERT(IsValid());
+    Py_DECREF(m_PyObject);
+  }
+
   inline Dictionary Object::ToDictionary()
   {
     return Dictionary::FromObject(*this);

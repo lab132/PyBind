@@ -39,6 +39,21 @@ namespace pyb
 
     bool IsOfType(BaseTypeObject* type) const;
 
+    /**
+    @brief Increments the ref counter of the underlying Python Objects.
+    THIS CAN LEAD TO MEMORY LEAKS if used without reasons (usually, when directly working with the python api)
+
+    This is usually used when a API call steals a reference to an object.
+    */
+    void IncrementRefCount();
+    /**
+    @brief Increments the ref counter of the underlying Python Objects.
+    THIS CAN DESTROY REFERENCE TOO EARLY if used without reasons (usually, when directly working with the python api)
+
+    This is usually used when a API call steals a reference to an object.
+    */
+    void DecrementRefCount();
+
     template<typename T>
     T ToValue();
 
