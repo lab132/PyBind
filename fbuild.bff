@@ -77,14 +77,14 @@
 
 .X64DebugConfig =
 [
-	Using( .X64BaseConfig )
-	.Config					= 'Debug'
-	.CompilerOptions		+ ' /DDEBUG /DPROFILING_ENABLED'
-							+ .CompilerDebugOptimizations
-	.PCHOptions				+ ' /DDEBUG /DPROFILING_ENABLED'
-							+ .CompilerDebugOptimizations
-	.LibrarianOptions		+ .LibrarianDebugOptimizations
-	.LinkerOptions			+ .LinkerDebugOptimizations
+  Using( .X64BaseConfig )
+  .Config          = 'Debug'
+  .CompilerOptions    + ' /DDEBUG /DPROFILING_ENABLED'
+              + .CompilerDebugOptimizations
+  .PCHOptions        + ' /DDEBUG /DPROFILING_ENABLED'
+              + .CompilerDebugOptimizations
+  .LibrarianOptions    + .LibrarianDebugOptimizations
+  .LinkerOptions      + .LinkerDebugOptimizations
 ]
 
 {
@@ -116,5 +116,5 @@ Executable("PyBindUnit")
   .CompilerInputPath = "PyBindUnit/src/"
   .Libraries = {"PyBindUnitLib"}
   .LinkerOutput = "bin/PyBindUnit.exe"
-  .LinkerOptions				+ ' /SUBSYSTEM:CONSOLE'
+  .LinkerOptions        + ' /SUBSYSTEM:CONSOLE'
 }
