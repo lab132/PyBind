@@ -21,7 +21,7 @@
               + ' /we4905' // wide string literal cast to 'LPSTR'
               + ' /we4906' // string literal cast to 'LPWSTR'
 
-  .CompilerOptions     = '"%1" /Z7 /nologo /c /W4'
+  .CompilerOptions     = '"%1" /GS /MP /FS /TP /W3 /Zi /EHsc /nologo /WX- /c'
               + ' /Zc:inline'      // Remove unreferenced COMDATs at compile time (VS2013.2+)
               + ' /Zc:strictStrings'  // Require const only usage of string literals (VS2013+)
               + .AdditionalWarnings
@@ -33,10 +33,10 @@
               + ' /Fp"%2" /Fo"%3"'
   .CompilerOptions    + ' /Fo"%2"'
   .LibrarianOptions    = ' /NOLOGO /OUT:"%2" "%1"'
-  .LinkerOptions      = ' /NOLOGO /INCREMENTAL:NO /OUT:"%2" "%1" /DEBUG'
+  .LinkerOptions      = ' /NOLOGO /INCREMENTAL:YES /OUT:"%2" "%1" /DEBUG'
 
   // Optimizations
-  .CompilerDebugOptimizations    = ' /MTd /Od /RTC1 /GS /Oy- /GR- /analyze'
+  .CompilerDebugOptimizations    = ' /MTd /RTC1 /Od /Ob0 /Gm- '
   .CompilerReleaseOptimizations  = ' /MT /Ox /Oy /Oi /GS- /GF /GL /Gy /Gw /GR- /analyze'
   .LibrarianDebugOptimizations  = ''
   .LibrarianReleaseOptimizations  = ' /LTCG'
