@@ -1,0 +1,66 @@
+;------------------
+; Creates Compiler for VS2010,VS2012,VS2013 and VS2015 with x86 and x64 support
+; Compiler names:
+;   - MSVC10-x86
+;   - MSVC11-x86
+;   - MSVC12-x86
+;   - MSVC14-x86:
+;   - MSVC10-x64
+;   - MSVC11-x64
+;   - MSVC12-x64
+;   - MSVC14-x64
+
+#once
+
+;VS 2010 Compiler
+#import VS100COMNTOOLS
+.Vs10BasePath = "$VS100COMNTOOLS$\..\..\"
+
+;VS 2012 Compiler
+#import VS110COMNTOOLS
+.Vs11BasePath = "$VS110COMNTOOLS$\..\..\"
+
+;VS 2013 Compiler
+#import VS120COMNTOOLS
+.Vs12BasePath = "$VS120COMNTOOLS$\..\..\"
+
+;VS 2015 Compiler
+#import VS140COMNTOOLS
+.Vs14BasePath = "$VS140COMNTOOLS$\..\..\"
+
+.CompilerBases = {"$Vs10BasePath$", "$Vs11BasePath$", "$Vs12BasePath$", "$Vs14BasePath$"}
+.CompilerNames = {'MSVC10', 'MSVC11', 'MSVC12', 'MSVC14'}
+.CompilerSuffixes = {"100", "110", "120", "140"}
+
+.CompilerPlatforms = {"x64", "x86"}
+.CompilerPlatformSubfolders = {"amd64", "amd64_x86"}
+
+ForEach(.Platform in .CompilerPlatforms,
+        .PlatformSubfolder in .CompilerPlatformSubfolders)
+{
+  ForEach(.Base in .CompilerBases,
+          .Name in .CompilerNames,
+          .Suffix in .CompilerSuffixes)
+  {
+    Compiler("$Name$-$Platform$")
+    {
+      .Root =  '$Base$\VC\bin\$PlatformSubfolder$'
+      .Executable = '$Root$\cl.exe'
+      .ExtraFiles =
+      {
+        '$Root$\mspdb$Suffix$.dll'
+        '$Root$\msobj$Suffix$.dll'
+        '$Root$\c1.dll'
+        '$Root$\c1xx.dll'
+        '$Root$\c2.dll'
+        '$Root$\mspdbsrv.exe'
+        '$Root$\mspdbcore.dll'
+        '$Root$\mspft$Suffix$.dll'
+        '$Root$\1033\clui.dll' ;TODO: 1033 is english i18n specific
+        '$Base$\VC\redist\$Platform$\Microsoft.VC$Suffix$.CRT\msvcp$Suffix$.dll'
+        '$Base$\VC\redist\$Platform$\Microsoft.VC$Suffix$.CRT\vcruntime$Suffix$.dll'
+        '$Base$\VC\redist\$Platform$\Microsoft.VC$Suffix$.CRT\vccorlib$Suffix$.dll'
+      }
+    }
+  }
+}
