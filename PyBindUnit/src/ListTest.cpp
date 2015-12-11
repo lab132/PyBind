@@ -45,6 +45,15 @@ SCENARIO("List access", "[binding][list][access]")
         REQUIRE(val2 == 2);
         REQUIRE(val3 == 3);
         REQUIRE(val4 == "hello");
+
+        AND_WHEN("Modifying the values in the list")
+        {
+          list.SetItem<std::string>(0, "bye");
+          THEN("The array should be changed")
+          {
+            REQUIRE("bye" == list.GetItem<std::string>(0));
+          }
+        }
       }
     }
   }
