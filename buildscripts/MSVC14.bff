@@ -1,0 +1,14 @@
+#once
+;VS 2015 Compiler
+#import VS140COMNTOOLS
+.Vs14BasePath = "$VS140COMNTOOLS$\..\..\"
+
+
+.CompilerBases = {"$Vs14BasePath$"}
+.CompilerNames = {"MSVC14"}
+.CompilerSuffixes = {"140"}
+
+.CompilerPlatforms = {"x64", "x86"}
+.CompilerPlatformSubfolders = {"amd64", "amd64_x86"}
+
+#include "MSVCCompiler.bff"

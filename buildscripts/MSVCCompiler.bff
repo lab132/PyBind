@@ -1,0 +1,29 @@
+ForEach(.Platform in .CompilerPlatforms,
+        .PlatformSubfolder in .CompilerPlatformSubfolders)
+{
+  ForEach(.Base in .CompilerBases,
+          .Name in .CompilerNames,
+          .Suffix in .CompilerSuffixes)
+  {
+    Compiler("$Name$-$Platform$")
+    {
+      .Root =  '$Base$\VC\bin\$PlatformSubfolder$'
+      .Executable = '$Root$\cl.exe'
+      .ExtraFiles =
+      {
+        '$Root$\mspdb$Suffix$.dll'
+        '$Root$\msobj$Suffix$.dll'
+        '$Root$\c1.dll'
+        '$Root$\c1xx.dll'
+        '$Root$\c2.dll'
+        '$Root$\mspdbsrv.exe'
+        '$Root$\mspdbcore.dll'
+        '$Root$\mspft$Suffix$.dll'
+        '$Root$\1033\clui.dll' ;TODO: 1033 is english i18n specific
+        '$Base$\VC\redist\$Platform$\Microsoft.VC$Suffix$.CRT\msvcp$Suffix$.dll'
+        '$Base$\VC\redist\$Platform$\Microsoft.VC$Suffix$.CRT\vcruntime$Suffix$.dll'
+        '$Base$\VC\redist\$Platform$\Microsoft.VC$Suffix$.CRT\vccorlib$Suffix$.dll'
+      }
+    }
+  }
+}

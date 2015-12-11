@@ -1,0 +1,14 @@
+#once
+;VS 2013 Compiler
+#import VS120COMNTOOLS
+.Vs14BasePath = "$VS120COMNTOOLS$\..\..\"
+
+
+.CompilerBases = {"$Vs12BasePath$"}
+.CompilerNames = {"MSVC12"}
+.CompilerSuffixes = {"120"}
+
+.CompilerPlatforms = {"x64", "x86"}
+.CompilerPlatformSubfolders = {"amd64", "amd64_x86"}
+
+#include "MSVCCompiler.bff"

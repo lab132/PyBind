@@ -1,0 +1,14 @@
+#once
+;VS 2013 Compiler
+#import VS100COMNTOOLS
+.Vs14BasePath = "$VS100COMNTOOLS$\..\..\"
+
+
+.CompilerBases = {"$Vs10BasePath$"}
+.CompilerNames = {"MSVC10"}
+.CompilerSuffixes = {"100"}
+
+.CompilerPlatforms = {"x64", "x86"}
+.CompilerPlatformSubfolders = {"amd64", "amd64_x86"}
+
+#include "MSVCCompiler.bff"

@@ -1,4 +1,4 @@
-#include "buildscripts/MSVCCompilers.bff"
+#include "buildscripts/MSVC14.bff"
 
 .VsBasePath = '$Vs14BasePath$'
 .WindowsSDKBasePath = "$Vs14BasePath$/../Windows Kits"
@@ -37,7 +37,7 @@
 
   // Optimizations
   .CompilerDebugOptimizations    = ' /MTd /RTC1 /Od /Ob0 /Gm- '
-  .CompilerReleaseOptimizations  = ' /MT /Ox /Oy /Oi /GS- /GF /GL /Gy /Gw /GR- /analyze'
+  .CompilerReleaseOptimizations  = ' /MT /Ox /Oy /Oi /GS- /GF /GL /Gy /Gw /GR-'
   .LibrarianDebugOptimizations  = ''
   .LibrarianReleaseOptimizations  = ' /LTCG'
   .LinkerDebugOptimizations    = ''
@@ -48,6 +48,8 @@
               + ' /I"$VsBasePath$/VC/atlmfc/include"'
               + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10240.0/ucrt"'
               + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10240.0/ucrt/include/um"'
+              + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10150.0/ucrt"'
+              + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10150.0/ucrt/include/um"'
               + ' /I"$WindowsSDKBasePath$/8.1/Include/um"'
               + ' /I"$WindowsSDKBasePath$/8.1/Include/shared"'
   .CompilerOptions    + .BaseIncludePaths
@@ -73,6 +75,10 @@
                  + ' /LIBPATH:"$PYTHON_API$/libs/"'
                  + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10240.0/um/x64/"'
                  + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10240.0/ucrt/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10150.0/um/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10150.0/ucrt/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/8.1/lib/winv6.3/um/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/8.1/lib/windv6.3/ucrt/x64/"'
 ]
 
 .X64DebugConfig =
