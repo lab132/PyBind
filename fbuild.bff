@@ -21,7 +21,7 @@
               + ' /we4905' // wide string literal cast to 'LPSTR'
               + ' /we4906' // string literal cast to 'LPWSTR'
 
-  .CompilerOptions     = '"%1" /GS /MP /FS /TP /W3 /Zi /EHsc /nologo /WX- /c'
+  .CompilerOptions     = '"%1" /MP /FS /TP /W3 /Zi /EHsc /nologo /WX- /c'
               + ' /Zc:inline'      // Remove unreferenced COMDATs at compile time (VS2013.2+)
               + ' /Zc:strictStrings'  // Require const only usage of string literals (VS2013+)
               + .AdditionalWarnings
@@ -36,12 +36,12 @@
   .LinkerOptions      = ' /NOLOGO /INCREMENTAL:YES /OUT:"%2" "%1" /DEBUG'
 
   // Optimizations
-  .CompilerDebugOptimizations    = ' /MTd /RTC1 /Od /Ob0 /Gm- '
-  .CompilerReleaseOptimizations  = ' /MT /Ox /Oy /Oi /GS- /GF /GL /Gy /Gw /GR-'
+  .CompilerDebugOptimizations    = ' /MDd /RTC1 /Od /Ob0 /Gm- /GS'
+  .CompilerReleaseOptimizations  = ' /MD /O2 /Ob2 /Oy /Ot /Oi /GS- /GF /GL /Gy /GR- /Gr /arch:AVX2'
   .LibrarianDebugOptimizations  = ''
-  .LibrarianReleaseOptimizations  = ' /LTCG'
+  .LibrarianReleaseOptimizations  = ' /LTCG:incremental'
   .LinkerDebugOptimizations    = ''
-  .LinkerReleaseOptimizations    = ' /LTCG /OPT:REF,ICF'
+  .LinkerReleaseOptimizations    = ' /LTCG:incremental /OPT:REF,ICF'
 
   .BaseIncludePaths    = ' /I"./"'
               + ' /I"$VsBasePath$/VC/include/"'
@@ -81,7 +81,7 @@
                  + ' /LIBPATH:"$WindowsSDKBasePath$/8.1/lib/windv6.3/ucrt/x64/"'
 ]
 
-.X64DebugConfig =
+.x64DebugConfig =
 [
   Using( .X64BaseConfig )
   .Config          = 'Debug'
@@ -93,34 +93,47 @@
   .LinkerOptions      + .LinkerDebugOptimizations
 ]
 
-{
-  .UnityInputPath="PyBindUnit/src/"
-  .UnityOutputPath= 'workspace/Unity/'
+.x64ReleaseConfig =
+[
+  Using( .X64BaseConfig )
+  .Config          = 'Release'
+  .CompilerOptions    + ' /DRELEASE'
+              + .CompilerReleaseOptimizations
+  .PCHOptions        + ' /DRELEASE'
+              + .CompilerReleaseOptimizations
+  .LibrarianOptions    + .LibrarianReleaseOptimizations
+  .LinkerOptions      + .LinkerReleaseOptimizations
+]
 
-  Unity("PyBindUnitUnity")
+.Configs = { .x64DebugConfig, .x64ReleaseConfig }
+
+ForEach(.Config in .Configs)
+{
+  Using(.Config)
+  .ProjectName = "PyBindUnit"
+  Unity("PyBindUnitUnity-$Platform$-$Config$")
   {
-    .UnityInputExcludedFiles="PyBindUnit.cpp"
-    .UnityOutputPath + "PyBindUnitUnity/"
+      .UnityInputPath="PyBindUnit/src/"
+      .UnityOutputPath= 'workspace/Unity/$ProjectName$-$Platform$-$Config$/'
+      .UnityInputExcludedFiles="PyBindUnit.cpp"
   }
-}
 
-ObjectList("PyBindUnitLib")
-{
-  Using(.X64DebugConfig)
-  .CompilerOptions + ' /I"PyBindUnit/inc/"'
-                   + ' /I"PyBind/inc/"'
-                   + ' /I"$PYTHON_API$/include/"'
-  .CompilerInputUnity = {"PyBindUnitUnity"}
-  .CompilerInputFiles="PyBindUnit/src/PyBindUnit.cpp"
-  .LibrarianOutput = "lib/PyBindUnit.lib"
-  .CompilerOutputPath = "workspace/Intermediate/"
-}
+  ObjectList("PyBindUnitLib-$Platform$-$Config$")
+  {
+    .CompilerOptions + ' /I"PyBindUnit/inc/"'
+                     + ' /I"PyBind/inc/"'
+                     + ' /I"$PYTHON_API$/include/"'
+    .CompilerInputUnity = {"PyBindUnitUnity-$Platform$-$Config$"}
+    .CompilerInputFiles="PyBindUnit/src/PyBindUnit.cpp"
+    .LibrarianOutput = "lib/PyBindUnit-$Platform$-$Config$.lib"
+    .CompilerOutputPath = "workspace/Intermediate/$Platform$-$Config$"
+  }
 
-Executable("PyBindUnit")
-{
-  Using(.X64BaseConfig)
-  .CompilerInputPath = "PyBindUnit/src/"
-  .Libraries = {"PyBindUnitLib"}
-  .LinkerOutput = "bin/PyBindUnit.exe"
-  .LinkerOptions        + ' /SUBSYSTEM:CONSOLE'
+  Executable("PyBindUnit-$Platform$-$Config$")
+  {
+    .CompilerInputPath = "PyBindUnit/src/"
+    .Libraries = {"PyBindUnitLib-$Platform$-$Config$"}
+    .LinkerOutput = "bin/PyBindUnit-$Platform$-$Config$.exe"
+    .LinkerOptions        + ' /SUBSYSTEM:CONSOLE'
+  }
 }
