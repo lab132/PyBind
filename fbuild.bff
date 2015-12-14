@@ -146,7 +146,7 @@
       .CompilerInputUnity = {"PyBindUnitUnity-$Platform$-$Config$"}
       .CompilerInputFiles="PyBindUnit/src/PyBindUnit.cpp"
       .LibrarianOutput = "lib/PyBindUnit-$Platform$-$Config$.lib"
-      .CompilerOutputPath = "workspace/Intermediate/$Platform$-$Config$"
+      .CompilerOutputPath = "workspace/Intermediate/$ProjectName$-$Platform$-$Config$"
     }
 
     Executable("PyBindUnit-$Platform$-$Config$")
