@@ -37,8 +37,10 @@
     Using(.ProjectBuildCommon)
     .ProjectOutput = "workspace/$ProjectName$.vcxproj"
     .ProjectInputPaths = {'$ProjectPath$/inc','$ProjectPath$/src'}
+    .OutputDirectory = "^$(SolutionDir)/../bin/"
+    .Output = "$OutputDirectory$$ProjectName$-x^$(PlatformArchitecture)-^$(Configuration).exe"
     .ProjectBasePath = '$ProjectPath$/'
     .PlatformToolset = "v140"
-    .IncludeSearchPath = '^$(SolutdionDir)../$ProjectName$/inc/;^$(SolutdionDir)../PyBind/inc;$PYTHON_API$/include'
+    .IncludeSearchPath = '^$(SolutionDir)../$ProjectName$/inc/;^$(SolutionDir)../PyBind/inc;$PYTHON_API$/include'
   }
 }

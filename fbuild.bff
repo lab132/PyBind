@@ -117,8 +117,8 @@
 
 .ProjectBuildCommon=
 [
-  .ProjectBuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -dist -cache ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
-  .ProjectRebuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -dist -cache -clean ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
+  .ProjectBuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -cache ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
+  .ProjectRebuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -cache -clean ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
 ]
 
 .ProjectConfigs={.DebugProjectConfig, .ReleaseProjectConfig}
