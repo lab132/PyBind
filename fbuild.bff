@@ -125,54 +125,15 @@
 
 .Configs = { .x64DebugConfig, .x64ReleaseConfig }
 
-{
-  .ProjectName = "PyBindUnit"
-  .ProjectPath = "$ProjectName$/"
-  ForEach(.Config in .Configs)
-  {
-    Using(.Config)
-    Unity("PyBindUnitUnity-$Platform$-$Config$")
-    {
-        .UnityInputPath="PyBindUnit/src/"
-        .UnityOutputPath= 'workspace/Unity/$ProjectName$-$Platform$-$Config$/'
-        .UnityInputExcludedFiles="PyBindUnit.cpp"
-    }
+#include "PyBind/PyBind.bff"
+#include "PyBindUnit/PyBindUnit.bff"
 
-    ObjectList("PyBindUnitLib-$Platform$-$Config$")
-    {
-      .CompilerOptions + ' /I"PyBindUnit/inc/"'
-                       + ' /I"PyBind/inc/"'
-                       + ' /I"$PYTHON_API$/include/"'
-      .CompilerInputUnity = {"PyBindUnitUnity-$Platform$-$Config$"}
-      .CompilerInputFiles="PyBindUnit/src/PyBindUnit.cpp"
-      .LibrarianOutput = "lib/PyBindUnit-$Platform$-$Config$.lib"
-      .CompilerOutputPath = "workspace/Intermediate/$ProjectName$-$Platform$-$Config$"
-    }
-
-    Executable("PyBindUnit-$Platform$-$Config$")
-    {
-      .CompilerInputPath = "PyBindUnit/src/"
-      .Libraries = {"PyBindUnitLib-$Platform$-$Config$"}
-      .LinkerOutput = "bin/PyBindUnit-$Platform$-$Config$.exe"
-      .LinkerOptions        + ' /SUBSYSTEM:CONSOLE'
-    }
-  }
-
-  VCXProject( "PyBindUnit" )
-  {
-    Using(.ProjectBuildCommon)
-    .ProjectOutput = "workspace/PyBindUnit.vcxproj"
-    .ProjectInputPaths = {'$ProjectPath$/inc','$ProjectPath$/src'}
-    .ProjectBasePath = '$ProjectPath$/'
-  }
-}
 
 VSSolution("solution")
 {
   .SolutionOutput="workspace/PyBind.sln"
-  .SolutionProjects = {'PyBindUnit'}
+  .SolutionProjects = {'PyBind','PyBindUnit'}
   .SolutionConfigs = .ProjectConfigs
   .SolutionVisualStudioVersion = "14.0.22823.1"
-  .SolutionMinimumVisualStudioVersion = "14.0.22823.1"
   .SolutionBuildProject="PyBindUnit"
 }
