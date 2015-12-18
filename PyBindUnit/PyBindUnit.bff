@@ -30,13 +30,32 @@
       .LinkerOutput = "bin/$ProjectName$-$Platform$-$Config$.exe"
       .LinkerOptions        + ' /SUBSYSTEM:CONSOLE'
     }
+
+    Test("$ProjectName$-Test-$Platform$-$Config$")
+    {
+      .TestExecutable = "$ProjectName$-$Platform$-$Config$"
+      .TestOutput = "workspace/Tests/$ProjectName$-$Platform$-$Config$.log"
+      .TestArguments = "-r console"
+      .TestWorkingDir = "."
+    }
   }
 
   VCXProject("$ProjectName$")
   {
-    Using(.ProjectBuildCommon)
     .ProjectOutput = "workspace/$ProjectName$.vcxproj"
     .ProjectInputPaths = {'$ProjectPath$/inc','$ProjectPath$/src'}
+    .OutputDirectory = "^$(SolutionDir)/../bin/"
+    .Output = "$OutputDirectory$$ProjectName$-x^$(PlatformArchitecture)-^$(Configuration).exe"
+    .ProjectBasePath = '$ProjectPath$/'
+    .PlatformToolset = "v140"
+    .IncludeSearchPath = '^$(SolutionDir)../$ProjectName$/inc/;^$(SolutionDir)../PyBind/inc;$PYTHON_API$/include'
+  }
+
+  VCXProject("$ProjectName$-Test")
+  {
+    .ProjectBuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -cache ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
+    .ProjectRebuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -cache -clean ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
+    .ProjectOutput = "workspace/$ProjectName$-Test.vcxproj"
     .OutputDirectory = "^$(SolutionDir)/../bin/"
     .Output = "$OutputDirectory$$ProjectName$-x^$(PlatformArchitecture)-^$(Configuration).exe"
     .ProjectBasePath = '$ProjectPath$/'

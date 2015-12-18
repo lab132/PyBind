@@ -178,6 +178,7 @@ VSSolution("solution")
   .SolutionOutput="workspace/PyBind.sln"
   .SolutionProjects = .Projects
   .SolutionProjects + "All"
+  .SolutionProjects + "PyBindUnit-Test"
   .SolutionConfigs = .ProjectConfigs
   .SolutionVisualStudioVersion = "14.0.22823.1"
   .SolutionBuildProject = "All"
