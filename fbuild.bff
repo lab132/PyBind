@@ -2,6 +2,7 @@
 
 .VsBasePath = '$Vs14BasePath$'
 .WindowsSDKBasePath = "$Vs14BasePath$/../Windows Kits"
+.PlatformToolset = "v140"
 
 
 //------------------------------------------------------------------------------
@@ -125,15 +126,59 @@
 
 .Configs = { .x64DebugConfig, .x64ReleaseConfig }
 
-#include "PyBind/PyBind.bff"
-#include "PyBindUnit/PyBindUnit.bff"
+// Projects to build (used by the All target)
+.BuildProjects={'PyBindUnit', 'PyBindTest'}
 
+// Projects to be listed in the solution
+.Projects = {'PyBind'}
+.Projects + .BuildProjects
+
+// Platforms to build
+.Platforms = {'x64'}
+
+ForEach(.Project in .Projects)
+{
+  #include "$Project$/$Project$.bff"
+}
+
+ForEach(.Config in .Configs)
+{
+  Using(.Config)
+  Alias("All-$Platform$-$Config$")
+  {
+    .Targets = {}
+    ForEach(.Project in .BuildProjects)
+    {
+      ^Targets + "$Project$-$Platform$-$Config$"
+
+    }
+  }
+}
+
+ForEach(.Platform in .Platforms)
+{
+  Alias("All-$Platform$")
+  {
+    .Targets = {"PyBindUnit-$Platform$-Debug",
+                "PyBindUnit-$Platform$-Release"}
+  }
+}
+
+
+VCXProject("All")
+{
+    Using(.ProjectBuildCommon)
+  	.ProjectOutput				= 'workspace/All.vcxproj'
+  	.ProjectFiles			= { '.\fbuild.bff' }
+  	.ProjectBasePath			= '.\'
+}
 
 VSSolution("solution")
 {
   .SolutionOutput="workspace/PyBind.sln"
-  .SolutionProjects = {'PyBind','PyBindUnit'}
+  .SolutionProjects = .Projects
+  .SolutionProjects + "All"
   .SolutionConfigs = .ProjectConfigs
   .SolutionVisualStudioVersion = "14.0.22823.1"
-  .SolutionBuildProject="PyBindUnit"
+  .SolutionBuildProject = "All"
 }

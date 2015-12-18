@@ -1,0 +1,39 @@
+{
+  .ProjectName = "PyBindTest"
+  .ProjectPath = "$ProjectName$/"
+  .IntermediateDirectory = "workspace/Intermediate/$ProjectName$/"
+  ForEach(.Config in .Configs)
+  {
+    Using(.Config)
+
+    ObjectList("$ProjectName$Lib-$Platform$-$Config$")
+    {
+      .CompilerOptions + ' /I"$ProjectName$/inc/"'
+                       + ' /I"PyBind/inc/"'
+                       + ' /I"$PYTHON_API$/include/"'
+      .CompilerInputFiles="$ProjectName$/src/PyBindTest.cpp"
+      .LibrarianOutput = "lib/$ProjectName$-$Platform$-$Config$.lib"
+      .CompilerOutputPath = "$IntermediateDirectory$/$Platform$-$Config$"
+    }
+
+    Executable("$ProjectName$-$Platform$-$Config$")
+    {
+      .CompilerInputPath = "$ProjectName$/src/"
+      .Libraries = {"$ProjectName$Lib-$Platform$-$Config$"}
+      .LinkerOutput = "bin/$ProjectName$-$Platform$-$Config$.exe"
+      .LinkerOptions        + ' /SUBSYSTEM:CONSOLE'
+    }
+  }
+
+  VCXProject("$ProjectName$")
+  {
+    Using(.ProjectBuildCommon)
+    .ProjectOutput = "workspace/$ProjectName$.vcxproj"
+    .ProjectInputPaths = {'$ProjectPath$/inc','$ProjectPath$/src'}
+    .OutputDirectory = "^$(SolutionDir)/../bin/"
+    .Output = "$OutputDirectory$$ProjectName$-x^$(PlatformArchitecture)-^$(Configuration).exe"
+    .ProjectBasePath = '$ProjectPath$/'
+    .PlatformToolset = "v140"
+    .IncludeSearchPath = '^$(SolutionDir)../$ProjectName$/inc/;^$(SolutionDir)../PyBind/inc;$PYTHON_API$/include'
+  }
+}
