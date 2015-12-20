@@ -82,9 +82,10 @@ namespace pyb
   }
 
   template<typename T>
-  inline void pyb::ListEntryRef::operator=(const T & obj)
+  inline void pyb::ListEntryRef::operator=(T obj)
   {
-    m_List.SetItemObject(m_Key, BuildValue<T>(obj));
+    Object createdObject = BuildValue<T>(obj);
+    m_List.SetItemObject(m_Key, createdObject);
   }
   template<typename T>
   inline T ListEntryRef::GetValue() const

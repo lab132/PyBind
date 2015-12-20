@@ -49,7 +49,7 @@ namespace pyb
     ListEntryRef(size_t key, const List& dict);
 
     template< typename T>
-    void operator =(const T& obj);
+    void operator =(T obj);
 
     template<typename T>
     T GetValue() const;

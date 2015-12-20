@@ -88,10 +88,11 @@ SCENARIO("List index operator", "[binding][list][access]")
 
         AND_WHEN("Modifying the values in the list")
         {
-          list.SetItem<std::string>(0, "bye");
+          list[0] = "bye";
           THEN("The array should be changed")
           {
-            REQUIRE("bye" == list.GetItem<std::string>(0));
+            std::string modified = list[0];
+            REQUIRE("bye" == modified);
           }
         }
       }
