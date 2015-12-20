@@ -1,0 +1,11 @@
+{
+  .ProjectName = "PyBind"
+  .ProjectPath = "$ProjectName$"
+  VCXProject("$ProjectName$")
+  {
+    .ProjectOutput = "workspace/$ProjectName$.vcxproj"
+    .ProjectInputPaths = {'$ProjectName$/inc/'}
+    .PorjectBasePath = '$ProjectName$/'
+    .PlatformToolset = 'v140'
+  }
+}

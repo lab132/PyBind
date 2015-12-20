@@ -1,0 +1,185 @@
+#include "buildscripts/MSVC14.bff"
+
+.VsBasePath = '$Vs14BasePath$'
+.WindowsSDKBasePath = "$Vs14BasePath$/../Windows Kits"
+.PlatformToolset = "v140"
+
+
+//------------------------------------------------------------------------------
+// Configurations
+//------------------------------------------------------------------------------
+.MSVCBaseConfig =
+[
+  .AdditionalWarnings    = ' /we4062' // enumerator 'identifier' in a switch of enum 'enumeration' is not handled
+              + ' /we4263' // 'function' : member function does not override any base class virtual member function
+              + ' /we4265' // 'class': class has virtual functions, but destructor is not virtual
+              + ' /we4296' // 'operator': expression is always false
+              + ' /we4555' // expression has no effect; expected expression with side-effect
+              + ' /we4619' // #pragma warning : there is no warning number 'number'
+              + ' /we4640' // 'instance' : construction of local static object is not thread-safe
+              + ' /we4826' // Conversion from 'type1 ' to 'type_2' is sign-extended. This may cause unexpected runtime behavior.
+              + ' /we4836' // nonstandard extension used : 'type' : local types or unnamed types cannot be used as template arguments
+              + ' /we4905' // wide string literal cast to 'LPSTR'
+              + ' /we4906' // string literal cast to 'LPWSTR'
+
+  .CompilerOptions     = '"%1" /MP /FS /TP /W3 /Zi /EHsc /nologo /WX- /c'
+              + ' /Zc:inline'      // Remove unreferenced COMDATs at compile time (VS2013.2+)
+              + ' /Zc:strictStrings'  // Require const only usage of string literals (VS2013+)
+              + .AdditionalWarnings
+              + ' /fp:fast'
+              + ' /D"WIN32_LEAN_AND_MEAN" /D_WIN32 /D__WINDOWS__'
+              + ' /D"_CRT_SECURE_NO_WARNINGS"' // don't warn about unsafe functions
+                            + ' /D"_WINSOCK_DEPRECATED_NO_WARNINGS"' // don't warn about deprecated winsock functions - TODO:C Update API use
+  .PCHOptions        = .CompilerOptions
+              + ' /Fp"%2" /Fo"%3"'
+  .CompilerOptions    + ' /Fo"%2"'
+  .LibrarianOptions    = ' /NOLOGO /OUT:"%2" "%1"'
+  .LinkerOptions      = ' /NOLOGO /INCREMENTAL:YES /OUT:"%2" "%1" /DEBUG'
+
+  // Optimizations
+  .CompilerDebugOptimizations    = ' /MDd /RTC1 /Od /Ob0 /Gm- /GS'
+  .CompilerReleaseOptimizations  = ' /MD /O2 /Ob2 /Oy /Ot /Oi /GS- /GF /GL /Gy /GR- /Gr /arch:AVX2'
+  .LibrarianDebugOptimizations  = ''
+  .LibrarianReleaseOptimizations  = ' /LTCG:incremental'
+  .LinkerDebugOptimizations    = ''
+  .LinkerReleaseOptimizations    = ' /LTCG:incremental /OPT:REF,ICF'
+
+  .BaseIncludePaths    = ' /I"./"'
+              + ' /I"$VsBasePath$/VC/include/"'
+              + ' /I"$VsBasePath$/VC/atlmfc/include"'
+              + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10240.0/ucrt"'
+              + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10240.0/ucrt/include/um"'
+              + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10150.0/ucrt"'
+              + ' /I"$WindowsSDKBasePath$/10/Include/10.0.10150.0/ucrt/include/um"'
+              + ' /I"$WindowsSDKBasePath$/8.1/Include/um"'
+              + ' /I"$WindowsSDKBasePath$/8.1/Include/shared"'
+  .CompilerOptions    + .BaseIncludePaths
+  .PCHOptions        + .BaseIncludePaths
+
+
+]
+
+#import PYTHON_API
+
+.X64BaseConfig=
+[
+  Using(.MSVCBaseConfig)
+  .ToolsBasePath = '$VsBasePath$/VC/bin/amd64'
+  .Compiler = 'MSVC14-x64'
+  .Librarian = '$ToolsBasePath$/lib.exe'
+  .Linker = '$ToolsBasePath$/link.exe'
+  .CompilerOptions + ' /DWIN64'
+  .PCHOptions + ' /DWIN64'
+  .LinkerOptions + ' /MACHINE:X64'
+  .Platform = 'x64'
+  .LinkerOptions + ' /LIBPATH:"$VsBasePath$/VC/lib/amd64"'
+                 + ' /LIBPATH:"$PYTHON_API$/libs/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10240.0/um/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10240.0/ucrt/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10150.0/um/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/10/lib/10.0.10150.0/ucrt/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/8.1/lib/winv6.3/um/x64/"'
+                 + ' /LIBPATH:"$WindowsSDKBasePath$/8.1/lib/windv6.3/ucrt/x64/"'
+]
+
+.x64DebugConfig =
+[
+  Using( .X64BaseConfig )
+  .Config          = 'Debug'
+  .CompilerOptions    + ' /DDEBUG /DPROFILING_ENABLED'
+              + .CompilerDebugOptimizations
+  .PCHOptions        + ' /DDEBUG /DPROFILING_ENABLED'
+              + .CompilerDebugOptimizations
+  .LibrarianOptions    + .LibrarianDebugOptimizations
+  .LinkerOptions      + .LinkerDebugOptimizations
+]
+
+.x64ReleaseConfig =
+[
+  Using( .X64BaseConfig )
+  .Config          = 'Release'
+  .CompilerOptions    + ' /DRELEASE'
+              + .CompilerReleaseOptimizations
+  .PCHOptions        + ' /DRELEASE'
+              + .CompilerReleaseOptimizations
+  .LibrarianOptions    + .LibrarianReleaseOptimizations
+  .LinkerOptions      + .LinkerReleaseOptimizations
+]
+.DebugProjectConfig=
+[
+  .Platform="x64"
+  .Config = "Debug"
+]
+.ReleaseProjectConfig=
+[
+  .Platform = "x64"
+  .Config = "Release"
+]
+
+.ProjectBuildCommon=
+[
+  .ProjectBuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -cache ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
+  .ProjectRebuildCommand = "cd ^$(SolutionDir)../ &amp; buildscripts\FBuild.exe -vs -cache -clean ^$(ProjectName)-x^$(PlatformArchitecture)-^$(Configuration)"
+]
+
+.ProjectConfigs={.DebugProjectConfig, .ReleaseProjectConfig}
+
+.Configs = { .x64DebugConfig, .x64ReleaseConfig }
+
+// Projects to build (used by the All target)
+.BuildProjects={'PyBindUnit', 'PyBindTest'}
+
+// Projects to be listed in the solution
+.Projects = {'PyBind'}
+.Projects + .BuildProjects
+
+// Platforms to build
+.Platforms = {'x64'}
+
+ForEach(.Project in .Projects)
+{
+  #include "$Project$/$Project$.bff"
+}
+
+ForEach(.Config in .Configs)
+{
+  Using(.Config)
+  Alias("All-$Platform$-$Config$")
+  {
+    .Targets = {}
+    ForEach(.Project in .BuildProjects)
+    {
+      ^Targets + "$Project$-$Platform$-$Config$"
+
+    }
+  }
+}
+
+ForEach(.Platform in .Platforms)
+{
+  Alias("All-$Platform$")
+  {
+    .Targets = {"PyBindUnit-$Platform$-Debug",
+                "PyBindUnit-$Platform$-Release"}
+  }
+}
+
+
+VCXProject("All")
+{
+    Using(.ProjectBuildCommon)
+  	.ProjectOutput				= 'workspace/All.vcxproj'
+  	.ProjectFiles			= { '.\fbuild.bff' }
+  	.ProjectBasePath			= '.\'
+}
+
+VSSolution("solution")
+{
+  .SolutionOutput="workspace/PyBind.sln"
+  .SolutionProjects = .Projects
+  .SolutionProjects + "All"
+  .SolutionProjects + "PyBindUnit-Test"
+  .SolutionConfigs = .ProjectConfigs
+  .SolutionVisualStudioVersion = "14.0.22823.1"
+  .SolutionBuildProject = "All"
+}
