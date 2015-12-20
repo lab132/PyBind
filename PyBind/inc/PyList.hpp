@@ -4,6 +4,8 @@
 
 namespace pyb
 {
+  class ListEntryRef;
+
   class List
   {
   public:
@@ -21,6 +23,8 @@ namespace pyb
 
     template <typename T>
     void SetItem(size_t index, const T& item);
+
+    ListEntryRef operator[](size_t index) const;
 
     size_t Size() const;
 

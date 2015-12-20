@@ -69,6 +69,11 @@ namespace pyb
     return obj.ToValue<T>();
   }
 
+  inline ListEntryRef List::operator[](size_t index) const
+  {
+    return ListEntryRef(index, *this);
+  }
+
   inline
   pyb::ListEntryRef::ListEntryRef(size_t key, const List & list) :
     m_List(list),
@@ -79,15 +84,16 @@ namespace pyb
   template<typename T>
   inline void pyb::ListEntryRef::operator=(const T & obj)
   {
-    PyList_SetItem()
+    m_List.SetItemObject(m_Key, BuildValue<T>(obj));
   }
   template<typename T>
   inline T ListEntryRef::GetValue() const
   {
-    return T();
+    return m_List.GetItem<T>(m_Key);
   }
   template<typename T>
   inline ListEntryRef::operator T() const
   {
+    return GetValue<T>();
   }
 }
